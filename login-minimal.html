@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>熊出没 · 极简登录</title>
+<style>
+  :root{--acc:#2f6b3f;--acc2:#3f8a52;--line:#e6e6e0;--ink:#2b2b28;--mut:#8a8a82;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{min-height:100%;}
+  body{font-family:"Helvetica Neue","PingFang SC","Microsoft YaHei",sans-serif;color:var(--ink);
+    min-height:100vh;overflow-x:hidden;background:#faf9f5;
+    background-image:radial-gradient(1200px 600px at 80% -10%,rgba(47,107,63,.06),transparent 60%);}
+  nav{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;
+    padding:16px 28px;background:rgba(250,249,245,.8);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:16px;letter-spacing:.5px;}
+  .brand .em{font-size:26px;}
+  .nav-links a{margin-left:6px;padding:8px 14px;border-radius:10px;color:var(--mut);text-decoration:none;cursor:pointer;font-size:14px;transition:.15s;}
+  .nav-links a:hover{color:var(--ink);}
+  .nav-links a.active{color:var(--acc);background:rgba(47,107,63,.08);}
+  .view{display:none;animation:fade .4s ease;}
+  .view.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .hero{max-width:860px;margin:0 auto;padding:90px 24px 40px;text-align:center;position:relative;z-index:2;}
+  .badge{display:inline-block;padding:6px 14px;border-radius:999px;border:1px solid var(--line);
+    color:var(--acc);font-size:12px;letter-spacing:2px;margin-bottom:22px;}
+  .hero h1{font-size:clamp(30px,5vw,46px);font-weight:600;letter-spacing:1px;line-height:1.25;margin-bottom:16px;}
+  .hero h1 span{color:var(--acc);}
+  .hero p{max-width:500px;margin:0 auto 30px;font-size:16px;line-height:1.9;color:var(--mut);}
+  .cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+  .btn{padding:13px 28px;border-radius:12px;cursor:pointer;font-weight:600;font-size:15px;font-family:inherit;transition:.15s;}
+  .btn.primary{background:var(--acc);color:#fff;border:none;}
+  .btn.primary:hover{background:var(--acc2);transform:translateY(-1px);}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line);}
+  .btn.ghost:hover{border-color:var(--acc);color:var(--acc);}
+  .stats{display:flex;gap:40px;justify-content:center;flex-wrap:wrap;margin-top:56px;}
+  .stat b{display:block;font-size:26px;font-weight:600;color:var(--ink);}
+  .stat span{font-size:13px;color:var(--mut);}
+
+  .login-wrap{max-width:400px;margin:60px auto;position:relative;z-index:2;}
+  .card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:36px 32px;
+    box-shadow:0 12px 40px rgba(0,0,0,.06);animation:rise .6s ease;}
+  @keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+  .brand2{display:flex;align-items:center;gap:11px;margin-bottom:26px;justify-content:center;}
+  .brand2 .em{font-size:34px;}
+  .brand2 h1{font-size:20px;font-weight:600;letter-spacing:1px;}
+  label{display:block;font-size:13px;font-weight:600;margin:0 0 7px 3px;color:var(--ink);}
+  .field{position:relative;margin-bottom:16px;}
+  .input{width:100%;padding:13px 44px 13px 15px;border-radius:11px;border:1px solid var(--line);
+    background:#fcfcfa;color:var(--ink);font-size:14px;font-family:inherit;transition:.15s;}
+  .input::placeholder{color:#bdbdb5;}
+  .input:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px rgba(47,107,63,.12);}
+  .input.ok{border-color:var(--acc);}
+  .input.err{border-color:#d9534f;}
+  .icon{position:absolute;right:13px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:15px;color:var(--mut);}
+  .row{display:flex;align-items:center;justify-content:space-between;margin:6px 3px 22px;font-size:13px;}
+  .remember{display:flex;align-items:center;gap:7px;cursor:pointer;color:var(--mut);}
+  .remember input{width:16px;height:16px;accent-color:var(--acc);}
+  .link{color:var(--acc);text-decoration:none;}
+  .btn.block{width:100%;}
+  .msg{text-align:center;font-size:13px;min-height:18px;margin-top:12px;color:var(--acc);}
+  .msg.err{color:#d9534f;}
+  .divider{text-align:center;color:#bcbcb4;font-size:12px;margin:22px 0 16px;}
+  .social{display:flex;gap:10px;}
+  .social button{flex:1;padding:11px;border-radius:11px;border:1px solid var(--line);background:#fcfcfa;cursor:pointer;
+    font-family:inherit;font-size:13px;color:var(--ink);transition:.15s;}
+  .social button:hover{border-color:var(--acc);color:var(--acc);}
+  .foot{text-align:center;margin-top:18px;font-size:13px;color:var(--mut);}
+
+  .home{max-width:860px;margin:0 auto;padding:48px 24px 60px;position:relative;z-index:2;}
+  .welcome{display:flex;align-items:center;gap:16px;margin-bottom:30px;}
+  .ava{width:60px;height:60px;border-radius:16px;background:var(--acc);display:flex;align-items:center;justify-content:center;font-size:30px;}
+  .welcome h2{font-size:23px;font-weight:600;}
+  .welcome p{color:var(--mut);font-size:14px;margin-top:3px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;}
+  .tile{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;cursor:pointer;transition:.18s;}
+  .tile:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.07);border-color:var(--acc);}
+  .tile .ic{font-size:30px;margin-bottom:10px;}
+  .tile h3{font-size:16px;font-weight:600;margin-bottom:6px;}
+  .tile p{font-size:13px;color:var(--mut);line-height:1.6;}
+  footer{text-align:center;padding:24px;color:var(--mut);font-size:12px;position:relative;z-index:2;border-top:1px solid var(--line);}
+  .confetti{position:fixed;top:-10px;width:8px;height:12px;border-radius:2px;z-index:60;pointer-events:none;}
+  @keyframes fallc{to{transform:translateY(105vh) rotate(540deg);opacity:0;}}
+</style>
+</head>
+<body>
+  <nav>
+    <div class="brand"><span class="em">🐻</span>熊出没 · 极简</div>
+    <div class="nav-links">
+      <a data-view="landing" class="active">首页</a>
+      <a data-view="login">登录</a>
+      <a data-view="home" id="navHome" style="display:none">个人中心</a>
+    </div>
+  </nav>
+  <section class="view active" id="landing">
+    <div class="hero">
+      <div class="badge">BOONIE BEARS · 纯粹体验</div>
+      <h1>欢迎来到 <span>狗熊岭</span></h1>
+      <p>少即是多。一个安静、干净的森林社区，记录你与熊大熊二的每一段时光。</p>
+      <div class="cta">
+        <button class="btn primary" data-go="login">进入林区</button>
+        <button class="btn ghost" data-go="home">先逛逛</button>
+      </div>
+      <div class="stats">
+        <div class="stat"><b>1280</b><span>森林伙伴</span></div>
+        <div class="stat"><b>365</b><span>冒险天数</span></div>
+        <div class="stat"><b>99%</b><span>快乐指数</span></div>
+      </div>
+    </div>
+  </section>
+  <section class="view" id="login">
+    <div class="login-wrap">
+      <div class="card">
+        <div class="brand2"><span class="em">🐻</span><h1>登录</h1></div>
+        <form id="form" novalidate>
+          <div class="field"><label for="acc">账号</label>
+            <input class="input" id="acc" placeholder="手机号 / 邮箱 / 用户名" autocomplete="username"/>
+            <span class="icon" id="accIcon"></span></div>
+          <div class="field"><label for="pwd">密码</label>
+            <input class="input" id="pwd" type="password" placeholder="请输入密码" autocomplete="current-password"/>
+            <span class="icon" id="eye">👁️</span></div>
+          <div class="row">
+            <label class="remember"><input type="checkbox" id="rem"/> 记住我</label>
+            <a href="#" class="link" id="forgot">忘记密码？</a></div>
+          <button class="btn primary block" type="submit" id="submit">登 录</button>
+          <div class="msg" id="msg"></div>
+        </form>
+        <div class="divider">— 或使用以下方式 —</div>
+        <div class="social">
+          <button data-p="微信">🐻 微信</button>
+          <button data-p="Apple">🍎 Apple</button>
+          <button data-p="QQ">💬 QQ</button></div>
+        <p class="foot">还没有账号？<a href="#" class="link" id="reg"><b>立即注册</b></a></p>
+      </div>
+    </div>
+  </section>
+  <section class="view" id="home">
+    <div class="home">
+      <div class="welcome"><div class="ava">🐻</div>
+        <div><h2 id="hi">欢迎回来，森林伙伴！</h2><p>今天也是美好的一天 🌿</p></div></div>
+      <div class="grid">
+        <div class="tile"><div class="ic">🌲</div><h3>我的林区</h3><p>查看认领树木与守护进度。</p></div>
+        <div class="tile"><div class="ic">🏅</div><h3>森林徽章</h3><p>已收集 12 枚，继续收集。</p></div>
+        <div class="tile"><div class="ic">📖</div><h3>冒险日志</h3><p>记录与熊大熊二的奇遇。</p></div>
+        <div class="tile"><div class="ic">⚙️</div><h3>账号设置</h3><p>管理资料、密码与登录。</p></div>
+      </div>
+    </div>
+  </section>
+  <footer>© 2026 熊出没 · 极简演示</footer>
+<script>
+  const $=id=>document.getElementById(id);
+  function showView(n){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    $(n).classList.add('active');document.querySelectorAll('.nav-links a[data-view]').forEach(a=>a.classList.toggle('active',a.dataset.view===n));}
+  document.querySelectorAll('[data-view]').forEach(a=>a.onclick=()=>showView(a.dataset.view));
+  document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>showView(b.dataset.go));
+  const acc=$('acc'),pwd=$('pwd'),msg=$('msg'),submit=$('submit'),eye=$('eye'),accIcon=$('accIcon'),form=$('form');
+  const isEmail=v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+  function setMsg(t,c){msg.textContent=t;msg.className='msg '+(c||'');}
+  function mark(el,s){el.classList.remove('ok','err');if(s)el.classList.add(s);}
+  acc.addEventListener('input',()=>{const v=acc.value.trim();if(!v){mark(acc,'');accIcon.textContent='';return;}
+    const ok=isEmail(v)||/^1\d{10}$/.test(v)||v.length>=3;mark(acc,ok?'ok':'err');accIcon.textContent=ok?'✅':'⚠️';});
+  pwd.addEventListener('input',()=>{const v=pwd.value;if(!v){mark(pwd,'');return;}mark(pwd,v.length>=6?'ok':'err');});
+  eye.onclick=()=>{const s=pwd.type==='password';pwd.type=s?'text':'password';eye.textContent=s?'🙈':'👁️';};
+  try{const s=localStorage.getItem('bb_acc');if(s){acc.value=s;$('rem').checked=true;acc.dispatchEvent(new Event('input'));}}catch(_){}
+  form.addEventListener('submit',e=>{e.preventDefault();const a=acc.value.trim(),p=pwd.value;let bad=false;
+    if(!a){mark(acc,'err');bad=true;}if(!p){mark(pwd,'err');bad=true;}else if(p.length<6){mark(pwd,'err');bad=true;}
+    if(bad){setMsg('请检查账号或密码','err');return;}
+    submit.disabled=true;submit.textContent='登录中…';setMsg('');
+    setTimeout(()=>{submit.disabled=false;submit.textContent='登 录';
+      if($('rem').checked){try{localStorage.setItem('bb_acc',a);}catch(_){}}
+      $('hi').textContent='欢迎回来，'+a+'！';$('navHome').style.display='';
+      setMsg('登录成功，欢迎来到狗熊岭！');confetti();showView('home');},900);});
+  function confetti(){const c=['#2f6b3f','#3f8a52','#9ccc65','#cddc39','#aed581'];
+    for(let i=0;i<36;i++){const x=document.createElement('div');x.className='confetti';
+      x.style.left=Math.random()*100+'vw';x.style.background=c[i%c.length];
+      x.style.animation=`fallc ${1.2+Math.random()*1.2}s ease-in forwards`;x.style.animationDelay=Math.random()*0.3+'s';
+      document.body.appendChild(x);setTimeout(()=>x.remove(),2800);}}
+  $('forgot').onclick=e=>{e.preventDefault();setMsg('请联系管理员重置密码');};
+  $('reg').onclick=e=>{e.preventDefault();setMsg('注册功能待接入后端');};
+  document.querySelectorAll('.social button').forEach(b=>b.onclick=()=>setMsg(b.dataset.p+' 登录待接入'));
+</script>
+</body>
+</html>
