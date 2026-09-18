@@ -1,0 +1,863 @@
+/* ===========================================================
+   forest.css — 森林高级风
+   作用域：html[data-style='forest']
+   来源：index.html
+   =========================================================== */
+
+@property --ang {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+html[data-style='forest'] {
+  --forest: #0f3d2e;
+  --forest2: #1b5e3f;
+  --gold: #d4af37;
+  --gold-soft: #f0d98a;
+  --text: #1c2b22;
+  --muted: #6f7d72;
+  --card-bg: rgba(255, 255, 255, 0.08);
+  --card-bd: rgba(255, 255, 255, 0.18);
+  --field-bg: rgba(255, 255, 255, 0.06);
+  --field-bd: rgba(255, 255, 255, 0.16);
+  --ink: #eef3ee;
+  --ink-soft: #cfe3d6;
+  --glow1: #3fb27f;
+  --glow2: #d4af37;
+}
+
+html[data-style='forest'][data-light='true'] {
+  --card-bg: rgba(255, 255, 255, 0.72);
+  --card-bd: rgba(20, 60, 40, 0.14);
+  --field-bg: rgba(255, 255, 255, 0.7);
+  --field-bd: rgba(20, 60, 40, 0.2);
+  --ink: #1c2b22;
+  --ink-soft: #3c5043;
+  --glow1: #7fd1a6;
+  --glow2: #e9c75a;
+}
+
+html[data-style='forest'] body {
+  font-family: 'PingFang SC', 'Microsoft YaHei', -apple-system, sans-serif;
+  color: var(--ink);
+}
+
+/* ---------- 动态渐变背景 ---------- */
+html[data-style='forest'] .bg-anim {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(125deg, #0b2e22, #103e2c, #1b5e3f, #0f3d2e, #114b34, #0b2e22);
+  background-size: 300% 300%;
+  animation: flow 20s ease infinite;
+  transition: background 0.4s;
+}
+
+html[data-style='forest'][data-light='true'] .bg-anim {
+  background: linear-gradient(125deg, #eef6f0, #dcefe1, #cdebd8, #e6f4ec, #dcefe1, #eef6f0);
+}
+
+@keyframes flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* ---------- 极光光斑 ---------- */
+html[data-style='forest'] .glow {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 0;
+  transition: 0.4s;
+}
+
+html[data-style='forest'] .g1 {
+  width: 460px;
+  height: 460px;
+  background: var(--glow1);
+  top: -120px;
+  left: -90px;
+  animation: drift1 16s ease-in-out infinite;
+}
+
+html[data-style='forest'] .g2 {
+  width: 380px;
+  height: 380px;
+  background: var(--glow2);
+  bottom: -120px;
+  right: -70px;
+  opacity: 0.32;
+  animation: drift2 19s ease-in-out infinite;
+}
+
+html[data-style='forest'] .g3 {
+  width: 300px;
+  height: 300px;
+  background: #5eead4;
+  top: 40%;
+  left: 55%;
+  opacity: 0.18;
+  animation: drift3 22s ease-in-out infinite;
+}
+
+@keyframes drift1 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(60px, 40px) scale(1.15);
+  }
+}
+
+@keyframes drift2 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-50px, -30px) scale(1.1);
+  }
+}
+
+@keyframes drift3 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-40px, 50px) scale(1.2);
+  }
+}
+
+/* ---------- 飘落树叶 ---------- */
+html[data-style='forest'] .leaf {
+  position: fixed;
+  top: -40px;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.7;
+  font-size: 18px;
+  animation: leaf-fall linear infinite;
+}
+
+@keyframes leaf-fall {
+  0% {
+    transform: translateY(-40px) translateX(0) rotate(0);
+  }
+  100% {
+    transform: translateY(110vh) translateX(60px) rotate(360deg);
+  }
+}
+
+/* ---------- 导航 ---------- */
+html[data-style='forest'] nav {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 28px;
+  backdrop-filter: blur(14px);
+  background: rgba(10, 40, 30, 0.35);
+  border-bottom: 1px solid var(--card-bd);
+  transition:
+    padding 0.3s,
+    background 0.4s,
+    box-shadow 0.3s;
+}
+
+html[data-style='forest'] nav.scrolled {
+  padding: 10px 28px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+}
+
+html[data-style='forest'][data-light='true'] nav {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+html[data-style='forest'] .nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+html[data-style='forest'] .nav-brand .em {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 21px;
+  background: linear-gradient(145deg, var(--gold), #b8932f);
+  box-shadow: 0 6px 16px rgba(212, 175, 55, 0.4);
+  transition: 0.3s;
+}
+
+html[data-style='forest'] .nav-brand .em:hover {
+  transform: rotate(-10deg) scale(1.08);
+}
+
+html[data-style='forest'] .nav-links {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+html[data-style='forest'] .nav-links a {
+  color: var(--ink-soft);
+  text-decoration: none;
+  font-size: 14px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.15s;
+  position: relative;
+}
+
+html[data-style='forest'] .nav-links a:hover {
+  background: var(--field-bg);
+  color: var(--ink);
+}
+
+html[data-style='forest'] .nav-links a.active {
+  color: var(--gold-soft);
+}
+
+html[data-style='forest'] .nav-links a.active::after {
+  content: '';
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 2px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+html[data-style='forest'] .theme {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--card-bd);
+  background: var(--field-bg);
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 17px;
+  transition: 0.2s;
+}
+
+html[data-style='forest'] .theme:hover {
+  transform: rotate(20deg) scale(1.05);
+}
+
+/* ---------- 落地页 ---------- */
+html[data-style='forest'] .hero {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 80px 28px 30px;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+html[data-style='forest'] .hero .spot {
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  left: 50%;
+  top: 30%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.18), transparent 70%);
+  pointer-events: none;
+  filter: blur(10px);
+  transition: 0.1s;
+}
+
+html[data-style='forest'] .badge {
+  display: inline-block;
+  padding: 7px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--card-bd);
+  background: var(--field-bg);
+  color: var(--gold-soft);
+  font-size: 13px;
+  letter-spacing: 2px;
+  margin-bottom: 22px;
+  animation: floaty 4s ease-in-out infinite;
+}
+
+@keyframes floaty {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+html[data-style='forest'] .hero h1 {
+  font-size: clamp(34px, 6vw, 58px);
+  line-height: 1.15;
+  letter-spacing: 2px;
+  margin-bottom: 18px;
+}
+
+html[data-style='forest'] .shine {
+  background: linear-gradient(100deg, var(--gold-soft), #fff, var(--gold), var(--gold-soft));
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shine 5s linear infinite;
+}
+
+@keyframes shine {
+  to {
+    background-position: 220% center;
+  }
+}
+
+html[data-style='forest'] .hero p {
+  max-width: 560px;
+  margin: 0 auto 32px;
+  color: var(--ink-soft);
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+/* ---------- 按钮 ---------- */
+html[data-style='forest'] .cta {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+html[data-style='forest'] .btn {
+  padding: 14px 30px;
+  border: none;
+  border-radius: 13px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  transition: 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  position: relative;
+  overflow: hidden;
+}
+
+html[data-style='forest'] .btn.primary {
+  color: #10241a;
+  background: linear-gradient(135deg, var(--gold-soft), var(--gold));
+  box-shadow: 0 12px 30px rgba(212, 175, 55, 0.4);
+}
+
+html[data-style='forest'] .btn.primary:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+  box-shadow: 0 18px 40px rgba(212, 175, 55, 0.5);
+}
+
+html[data-style='forest'] .btn.ghost {
+  color: var(--ink);
+  background: var(--field-bg);
+  border: 1px solid var(--field-bd);
+}
+
+html[data-style='forest'] .btn.ghost:hover {
+  background: var(--card-bg);
+  transform: translateY(-2px);
+}
+
+/* ---------- 数据统计 ---------- */
+html[data-style='forest'] .stats {
+  display: flex;
+  gap: 30px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 54px;
+}
+
+html[data-style='forest'] .stat {
+  text-align: center;
+}
+
+html[data-style='forest'] .stat b {
+  display: block;
+  font-size: 30px;
+  background: linear-gradient(135deg, var(--gold-soft), var(--gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+html[data-style='forest'] .stat span {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+/* ---------- 特色区 ---------- */
+html[data-style='forest'] .features {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 30px 28px;
+  position: relative;
+  z-index: 2;
+}
+
+html[data-style='forest'] .section-title {
+  text-align: center;
+  font-size: 26px;
+  margin-bottom: 8px;
+  color: var(--ink);
+}
+
+html[data-style='forest'] .section-sub {
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 14px;
+  margin-bottom: 30px;
+}
+
+html[data-style='forest'] .fgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+html[data-style='forest'] .fcard {
+  background: var(--card-bg);
+  border: 1px solid var(--card-bd);
+  border-radius: 18px;
+  padding: 24px;
+  backdrop-filter: blur(10px);
+  transition:
+    transform 0.25s,
+    box-shadow 0.25s;
+  cursor: default;
+}
+
+html[data-style='forest'] .fcard:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 44px rgba(0, 0, 0, 0.32);
+}
+
+html[data-style='forest'] .fcard .ic {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+html[data-style='forest'] .fcard h3 {
+  font-size: 17px;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+html[data-style='forest'] .fcard p {
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+
+/* ---------- 登录卡片 ---------- */
+html[data-style='forest'] .login-wrap {
+  max-width: 420px;
+  margin: 64px auto;
+  position: relative;
+  z-index: 2;
+  perspective: 900px;
+}
+
+html[data-style='forest'] .card {
+  position: relative;
+  background: var(--card-bg);
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  border: 1px solid var(--card-bd);
+  border-radius: 24px;
+  padding: 38px 34px;
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transition:
+    transform 0.15s,
+    background 0.4s;
+  animation: rise 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+html[data-style='forest'] .card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 25px;
+  padding: 1.4px;
+  pointer-events: none;
+  background: conic-gradient(
+    from var(--ang),
+    transparent 0%,
+    var(--gold) 18%,
+    transparent 36%,
+    transparent 60%,
+    var(--gold-soft) 78%,
+    transparent 96%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: rot 6s linear infinite;
+  opacity: 0.8;
+}
+
+@keyframes rot {
+  to {
+    --ang: 360deg;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+html[data-style='forest'] .card.shake {
+  animation: shake 0.4s;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-9px);
+  }
+  40%,
+  80% {
+    transform: translateX(9px);
+  }
+}
+
+html[data-style='forest'] .brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+html[data-style='forest'] .brand .emblem {
+  width: 52px;
+  height: 52px;
+  border-radius: 15px;
+  background: linear-gradient(145deg, var(--gold), #b8932f);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 27px;
+  box-shadow: 0 8px 22px rgba(212, 175, 55, 0.4);
+  transition: transform 0.3s;
+}
+
+html[data-style='forest'] .brand .emblem:hover {
+  transform: rotate(-8deg) scale(1.06);
+}
+
+html[data-style='forest'] .brand h1 {
+  font-size: 19px;
+  letter-spacing: 1px;
+  color: var(--ink);
+}
+
+html[data-style='forest'] .brand p {
+  font-size: 11px;
+  color: var(--gold-soft);
+  letter-spacing: 3px;
+  margin-top: 3px;
+}
+
+/* ---------- 表单 ---------- */
+html[data-style='forest'] label {
+  display: block;
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin: 0 0 8px 2px;
+  font-weight: 600;
+}
+
+html[data-style='forest'] .field {
+  position: relative;
+  margin-bottom: 18px;
+}
+
+html[data-style='forest'] .input {
+  width: 100%;
+  padding: 14px 44px 14px 16px;
+  border-radius: 13px;
+  border: 1px solid var(--field-bd);
+  background: var(--field-bg);
+  color: var(--ink);
+  font-size: 14px;
+  font-family: inherit;
+  transition: 0.18s;
+}
+
+html[data-style='forest'] .input::placeholder {
+  color: rgba(120, 140, 130, 0.55);
+}
+
+html[data-style='forest'] .input:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.25);
+}
+
+html[data-style='forest'] .input.ok {
+  border-color: #4ade80;
+  box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.2);
+}
+
+html[data-style='forest'] .input.err {
+  border-color: #ff7a7a;
+  box-shadow: 0 0 0 3px rgba(255, 122, 122, 0.2);
+}
+
+html[data-style='forest'] .icon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 15px;
+  cursor: pointer;
+  color: var(--ink-soft);
+  user-select: none;
+}
+
+html[data-style='forest'] .row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 6px 2px 22px;
+  font-size: 13px;
+}
+
+html[data-style='forest'] .remember {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+html[data-style='forest'] .remember input {
+  accent-color: var(--gold);
+  width: 16px;
+  height: 16px;
+}
+
+html[data-style='forest'] .link {
+  color: var(--gold-soft);
+  text-decoration: none;
+}
+
+html[data-style='forest'] .link:hover {
+  text-decoration: underline;
+}
+
+html[data-style='forest'] .btn.block {
+  width: 100%;
+  justify-content: center;
+}
+
+html[data-style='forest'] .msg {
+  text-align: center;
+  font-size: 13px;
+  min-height: 18px;
+  margin-top: 14px;
+  color: var(--gold-soft);
+}
+
+html[data-style='forest'] .msg.err {
+  color: #ff9a9a;
+}
+
+html[data-style='forest'] .divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: rgba(130, 150, 140, 0.6);
+  font-size: 12px;
+  margin: 22px 0 16px;
+}
+
+html[data-style='forest'] .divider::before,
+html[data-style='forest'] .divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--field-bd);
+}
+
+html[data-style='forest'] .social {
+  display: flex;
+  gap: 12px;
+}
+
+html[data-style='forest'] .social button {
+  flex: 1;
+  padding: 11px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 13px;
+  border: 1px solid var(--field-bd);
+  background: var(--field-bg);
+  color: var(--ink);
+  transition: 0.15s;
+}
+
+html[data-style='forest'] .social button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+}
+
+html[data-style='forest'] .social button:active {
+  transform: scale(0.97);
+}
+
+html[data-style='forest'] .foot {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+html[data-style='forest'] .foot b {
+  color: var(--gold-soft);
+}
+
+/* ---------- 个人中心 ---------- */
+html[data-style='forest'] .home {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 48px 28px 60px;
+  position: relative;
+  z-index: 2;
+}
+
+html[data-style='forest'] .welcome {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+html[data-style='forest'] .welcome .ava {
+  width: 60px;
+  height: 60px;
+  border-radius: 18px;
+  background: linear-gradient(145deg, var(--gold), #b8932f);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  box-shadow: 0 10px 24px rgba(212, 175, 55, 0.4);
+}
+
+html[data-style='forest'] .welcome h2 {
+  font-size: 24px;
+  color: var(--ink);
+}
+
+html[data-style='forest'] .welcome p {
+  color: var(--ink-soft);
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+html[data-style='forest'] .grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 18px;
+}
+
+html[data-style='forest'] .tile {
+  background: var(--card-bg);
+  border: 1px solid var(--card-bd);
+  border-radius: 18px;
+  padding: 22px;
+  transition:
+    transform 0.25s,
+    box-shadow 0.25s;
+  cursor: pointer;
+  transform-style: preserve-3d;
+}
+
+html[data-style='forest'] .tile:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.3);
+}
+
+html[data-style='forest'] .tile .ic {
+  font-size: 30px;
+  margin-bottom: 12px;
+}
+
+html[data-style='forest'] .tile h3 {
+  font-size: 16px;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+html[data-style='forest'] .tile p {
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+
+/* ---------- 页脚 ---------- */
+html[data-style='forest'] footer {
+  text-align: center;
+  padding: 26px;
+  color: var(--ink-soft);
+  font-size: 12px;
+  position: relative;
+  z-index: 2;
+  border-top: 1px solid var(--card-bd);
+}
+
+@media (max-width: 600px) {
+  html[data-style='forest'] .stats {
+    gap: 18px;
+  }
+  html[data-style='forest'] .hero {
+    padding-top: 50px;
+  }
+}

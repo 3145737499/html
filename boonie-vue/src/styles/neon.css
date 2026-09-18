@@ -1,0 +1,513 @@
+/* ===========================================================
+   neon.css — 暗夜霓虹风
+   作用域：html[data-style='neon']
+   来源：login-neon.html
+   =========================================================== */
+
+html[data-style='neon'] {
+  --c1: #00f0ff;
+  --c2: #ff2bd6;
+  --c3: #7a5cff;
+}
+
+html[data-style='neon'] body {
+  font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  color: #e8f6ff;
+  background:
+    radial-gradient(900px 600px at 80% -10%, rgba(255, 43, 214, 0.18), transparent 60%),
+    radial-gradient(800px 500px at -10% 110%, rgba(0, 240, 255, 0.18), transparent 60%),
+    linear-gradient(135deg, #05060f, #0a0a1f 60%, #05060f);
+}
+
+/* ---------- 网格背景 ---------- */
+html[data-style='neon'] .grid-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(0, 240, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 240, 255, 0.07) 1px, transparent 1px);
+  background-size: 46px 46px;
+  mask: radial-gradient(circle at 50% 40%, #000, transparent 80%);
+  -webkit-mask: radial-gradient(circle at 50% 40%, #000, transparent 80%);
+  animation: grid-slide 18s linear infinite;
+}
+
+@keyframes grid-slide {
+  to {
+    background-position: 46px 46px;
+  }
+}
+
+/* ---------- 导航 ---------- */
+html[data-style='neon'] nav {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 26px;
+  background: rgba(5, 6, 15, 0.5);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+}
+
+html[data-style='neon'] .nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  font-size: 17px;
+  color: #fff;
+  text-shadow: 0 0 8px var(--c1);
+}
+
+html[data-style='neon'] .nav-brand .em {
+  font-size: 28px;
+  filter: drop-shadow(0 0 6px var(--c2));
+}
+
+html[data-style='neon'] .nav-links a {
+  margin-left: 6px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  color: #9fdfff;
+  text-decoration: none;
+  cursor: pointer;
+  font-weight: 700;
+  transition: 0.15s;
+}
+
+html[data-style='neon'] .nav-links a:hover {
+  color: #fff;
+  text-shadow: 0 0 8px var(--c1);
+}
+
+html[data-style='neon'] .nav-links a.active {
+  color: #fff;
+  background: rgba(0, 240, 255, 0.12);
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.3) inset;
+}
+
+/* ---------- 落地页 ---------- */
+html[data-style='neon'] .hero {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 70px 24px;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+html[data-style='neon'] .badge {
+  display: inline-block;
+  padding: 7px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--c2);
+  color: var(--c2);
+  font-size: 13px;
+  letter-spacing: 2px;
+  margin-bottom: 20px;
+  box-shadow: 0 0 16px rgba(255, 43, 214, 0.4);
+}
+
+html[data-style='neon'] .hero h1 {
+  font-size: clamp(32px, 6vw, 54px);
+  line-height: 1.2;
+  margin-bottom: 16px;
+  background: linear-gradient(90deg, var(--c1), var(--c2), var(--c3));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 14px rgba(0, 240, 255, 0.35));
+}
+
+html[data-style='neon'] .hero h1 .shine {
+  background: inherit;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: none;
+}
+
+html[data-style='neon'] .hero p {
+  max-width: 540px;
+  margin: 0 auto 28px;
+  font-size: 16px;
+  line-height: 1.8;
+  color: #a9c8e8;
+}
+
+html[data-style='neon'] .cta {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+html[data-style='neon'] .btn {
+  padding: 14px 30px;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 1px;
+  transition: 0.15s;
+  position: relative;
+  overflow: hidden;
+  font-family: inherit;
+}
+
+html[data-style='neon'] .btn.primary {
+  color: #02121a;
+  background: linear-gradient(135deg, var(--c1), #7af9ff);
+  box-shadow: 0 0 22px rgba(0, 240, 255, 0.55);
+}
+
+html[data-style='neon'] .btn.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 34px rgba(0, 240, 255, 0.8);
+}
+
+html[data-style='neon'] .btn.ghost {
+  color: var(--c2);
+  background: transparent;
+  border: 1px solid var(--c2);
+  box-shadow: 0 0 16px rgba(255, 43, 214, 0.3);
+}
+
+html[data-style='neon'] .btn.ghost:hover {
+  background: rgba(255, 43, 214, 0.12);
+  transform: translateY(-2px);
+}
+
+html[data-style='neon'] .stats {
+  display: flex;
+  gap: 30px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 48px;
+}
+
+html[data-style='neon'] .stat b {
+  display: block;
+  font-size: 28px;
+  color: var(--c1);
+  text-shadow: 0 0 12px var(--c1);
+}
+
+html[data-style='neon'] .stat span {
+  font-size: 13px;
+  color: #9fb8d8;
+}
+
+/* ---------- 登录卡片 ---------- */
+html[data-style='neon'] .login-wrap {
+  max-width: 420px;
+  margin: 50px auto;
+  position: relative;
+  z-index: 2;
+}
+
+html[data-style='neon'] .card {
+  position: relative;
+  background: rgba(10, 12, 28, 0.7);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 240, 255, 0.35);
+  border-radius: 22px;
+  padding: 34px 30px;
+  box-shadow:
+    0 0 40px rgba(0, 240, 255, 0.18),
+    inset 0 0 30px rgba(122, 92, 255, 0.08);
+  animation: neon-rise 0.6s ease;
+}
+
+@keyframes neon-rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+html[data-style='neon'] .card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 23px;
+  padding: 1px;
+  pointer-events: none;
+  background: linear-gradient(120deg, var(--c1), transparent 40%, var(--c2), transparent 70%, var(--c3));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.7;
+}
+
+html[data-style='neon'] .card.shake {
+  animation: shake 0.4s;
+}
+
+html[data-style='neon'] .brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 22px;
+  justify-content: center;
+}
+
+html[data-style='neon'] .brand .emblem {
+  font-size: 38px;
+  filter: drop-shadow(0 0 8px var(--c2));
+  animation: pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+html[data-style='neon'] .brand h1 {
+  font-size: 21px;
+  color: #fff;
+  text-shadow: 0 0 10px var(--c1);
+}
+
+/* ---------- 表单 ---------- */
+html[data-style='neon'] label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0 0 7px 4px;
+  color: #9fdfff;
+}
+
+html[data-style='neon'] .field {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+html[data-style='neon'] .input {
+  width: 100%;
+  padding: 14px 44px 14px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  background: rgba(0, 240, 255, 0.06);
+  color: #e8f6ff;
+  font-size: 14px;
+  font-family: inherit;
+  transition: 0.15s;
+}
+
+html[data-style='neon'] .input::placeholder {
+  color: rgba(159, 223, 255, 0.45);
+}
+
+html[data-style='neon'] .input:focus {
+  outline: none;
+  border-color: var(--c1);
+  box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.25);
+}
+
+html[data-style='neon'] .input.ok {
+  border-color: #4ade80;
+  box-shadow: 0 0 10px rgba(74, 222, 128, 0.4);
+}
+
+html[data-style='neon'] .input.err {
+  border-color: #ff5d7a;
+  box-shadow: 0 0 10px rgba(255, 93, 122, 0.4);
+}
+
+html[data-style='neon'] .icon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 15px;
+}
+
+html[data-style='neon'] .row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 6px 4px 20px;
+  font-size: 13px;
+}
+
+html[data-style='neon'] .remember {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  color: #9fdfff;
+}
+
+html[data-style='neon'] .remember input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--c1);
+}
+
+html[data-style='neon'] .link {
+  color: var(--c2);
+  text-decoration: none;
+}
+
+html[data-style='neon'] .btn.block {
+  width: 100%;
+  justify-content: center;
+}
+
+html[data-style='neon'] .msg {
+  text-align: center;
+  font-size: 13px;
+  min-height: 18px;
+  margin-top: 12px;
+  color: var(--c1);
+}
+
+html[data-style='neon'] .msg.err {
+  color: #ff5d7a;
+}
+
+html[data-style='neon'] .divider {
+  text-align: center;
+  color: #7fa8d8;
+  font-size: 12px;
+  margin: 20px 0 14px;
+}
+
+html[data-style='neon'] .social {
+  display: flex;
+  gap: 10px;
+}
+
+html[data-style='neon'] .social button {
+  flex: 1;
+  padding: 11px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  background: rgba(0, 240, 255, 0.06);
+  color: #e8f6ff;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 13px;
+  transition: 0.15s;
+}
+
+html[data-style='neon'] .social button:hover {
+  box-shadow: 0 0 16px rgba(0, 240, 255, 0.4);
+  transform: translateY(-2px);
+}
+
+html[data-style='neon'] .foot {
+  text-align: center;
+  margin-top: 18px;
+  font-size: 13px;
+  color: #9fb8d8;
+}
+
+/* ---------- 个人中心 ---------- */
+html[data-style='neon'] .home {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 44px 24px 60px;
+  position: relative;
+  z-index: 2;
+}
+
+html[data-style='neon'] .welcome {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+html[data-style='neon'] .welcome .ava {
+  width: 62px;
+  height: 62px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, var(--c1), var(--c3));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  box-shadow: 0 0 22px rgba(0, 240, 255, 0.5);
+}
+
+html[data-style='neon'] .welcome h2 {
+  font-size: 24px;
+  color: #fff;
+  text-shadow: 0 0 10px var(--c1);
+}
+
+html[data-style='neon'] .welcome p {
+  color: #9fb8d8;
+  font-size: 14px;
+}
+
+html[data-style='neon'] .grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+html[data-style='neon'] .tile {
+  background: rgba(10, 12, 28, 0.7);
+  border: 1px solid rgba(0, 240, 255, 0.25);
+  border-radius: 18px;
+  padding: 22px;
+  cursor: pointer;
+  transition: 0.2s;
+  backdrop-filter: blur(8px);
+}
+
+html[data-style='neon'] .tile:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 26px rgba(0, 240, 255, 0.35);
+  border-color: var(--c1);
+}
+
+html[data-style='neon'] .tile .ic {
+  font-size: 32px;
+  margin-bottom: 10px;
+  filter: drop-shadow(0 0 6px var(--c2));
+}
+
+html[data-style='neon'] .tile h3 {
+  font-size: 17px;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+html[data-style='neon'] .tile p {
+  font-size: 13px;
+  color: #9fb8d8;
+  line-height: 1.6;
+}
+
+html[data-style='neon'] footer {
+  text-align: center;
+  padding: 24px;
+  color: #7fa8d8;
+  font-size: 12px;
+  position: relative;
+  z-index: 2;
+  border-top: 1px solid rgba(0, 240, 255, 0.15);
+}
