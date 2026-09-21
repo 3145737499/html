@@ -1,0 +1,9 @@
+com\fenglin\springboottest\mapper\UserMapper.class
+com\fenglin\springboottest\service\impl\AuthServiceImpl$CodeEntry.class
+com\fenglin\springboottest\service\impl\AuthServiceImpl.class
+com\fenglin\springboottest\common\Result.class
+com\fenglin\springboottest\service\AuthService.class
+com\fenglin\springboottest\config\CorsConfig.class
+com\fenglin\springboottest\entity\User.class
+com\fenglin\springboottest\controller\AuthController.class
+com\fenglin\springboottest\mail\MailService.class

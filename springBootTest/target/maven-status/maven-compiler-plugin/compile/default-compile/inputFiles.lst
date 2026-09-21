@@ -1,0 +1,10 @@
+D:\workSpace\springBootTest\src\main\java\com\fenglin\springboottest\common\Result.java
+D:\workSpace\springBootTest\src\main\java\com\fenglin\springboottest\config\CorsConfig.java
+D:\workSpace\springBootTest\src\main\java\com\fenglin\springboottest\controller\AuthController.java
+D:\workSpace\springBootTest\src\main\java\com\fenglin\springboottest\entity\User.java
+D:\workSpace\springBootTest\src\main\java\com\fenglin\springboottest\mail\MailService.java
+D:\workSpace\springBootTest\src\main\java\com\fenglin\springboottest\mapper\UserMapper.java
+D:\workSpace\springBootTest\src\main\java\com\fenglin\springboottest\service\AuthService.java
+D:\workSpace\springBootTest\src\main\java\com\fenglin\springboottest\service\impl\AuthServiceImpl.java
+D:\workSpace\springBootTest\src\main\java\com\fenglin\springboottest\SpringBootTestApplication.java
+D:\workSpace\springBootTest\src\main\java\com\fenglin\springboottest\UserController.java
