@@ -1,0 +1,21 @@
+{
+  "name": "lihengyan-vue",
+  "version": "1.0.0",
+  "private": true,
+  "description": "离恨烟 · 烟雨阁 — Vue 3 水墨丹青登录演示",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "pinia": "^3.0.3",
+    "vue": "^3.5.43",
+    "vue-router": "^4.5.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.4",
+    "vite": "^6.3.5"
+  }
+}

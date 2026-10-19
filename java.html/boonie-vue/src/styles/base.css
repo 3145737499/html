@@ -1,0 +1,153 @@
+/* ===========================================================
+   base.css — 公共重置、视图切换、特效层
+   由原 4 个 HTML 文件中重复的部分抽取而来
+   =========================================================== */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+/* 主题切换时字体在风格间平滑过渡 */
+body {
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background 0.4s;
+}
+
+a {
+  cursor: pointer;
+}
+
+button {
+  font: inherit;
+}
+
+/* ---------- 视图淡入 ---------- */
+.view {
+  animation: view-fade 0.4s ease;
+}
+
+@keyframes view-fade {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- 滚动揭示 ---------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(34px);
+  transition:
+    opacity 0.7s cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.reveal.in {
+  opacity: 1;
+  transform: none;
+}
+
+/* 尊重系统的「减少动态效果」偏好 */
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* ---------- 庆祝特效 ---------- */
+.confetti-piece {
+  position: fixed;
+  top: -10px;
+  width: 9px;
+  height: 14px;
+  border-radius: 2px;
+  opacity: 0.9;
+  pointer-events: none;
+  z-index: 60;
+}
+
+@keyframes fallc {
+  to {
+    transform: translateY(105vh) rotate(540deg);
+    opacity: 0;
+  }
+}
+
+.burst {
+  position: fixed;
+  top: 40%;
+  left: 50%;
+  font-size: 26px;
+  z-index: 60;
+  pointer-events: none;
+  animation: boom 0.9s ease-out forwards;
+}
+
+@keyframes boom {
+  to {
+    transform: translate(var(--x), var(--y)) scale(0.3);
+    opacity: 0;
+  }
+}
+
+/* ---------- 按钮水波纹（森林风） ---------- */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transform: scale(0);
+  animation: rip 0.6s ease-out;
+  pointer-events: none;
+}
+
+@keyframes rip {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* ---------- 加载转圈 ---------- */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(16, 36, 26, 0.3);
+  border-top-color: #10241a;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: none;
+}
+
+.btn.loading .spinner {
+  display: inline-block;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

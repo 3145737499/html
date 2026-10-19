@@ -1,0 +1,17 @@
+# Dependencies (recreated by start-all.bat on boot)
+node_modules/
+
+# Build output (stale, from before backend integration)
+dist/
+
+# Logs
+*.log
+vite-log.txt
+
+# IDE
+.idea/
+.vscode/
+
+# System files
+.DS_Store
+Thumbs.db
