@@ -195,3 +195,27 @@ UPDATE `app_item` SET `detail`='江湖险恶，遇险莫慌。\n点开急救飞�
 -- 账号设置 / 消息提醒
 UPDATE `app_item` SET `detail`='在此打理你在烟雨阁的名号。\n可改江湖名号、更换印鉴头像、修改口令，或绑定新的登录方式。\n名号是你在江湖的脸面，改之前不妨再读一遍烟雨楼的规矩：名号一改，旧帖作废。' WHERE `title`='账号设置';
 UPDATE `app_item` SET `detail`='江湖消息多如雨点，取舍全凭本心。\n可分别设置：江湖动态（可关）、好友书信（建议开）、飞信救援（请务必开）。\n提醒方式可选檐下风铃或案头小灯，静音一时可以，静音一世不可。' WHERE `title`='消息提醒';
+
+-- ------------------------------------------------------------
+-- 让「伞面丹青」进入首页精选（阁中珍藏卷轴更丰满，幂等）
+-- ------------------------------------------------------------
+UPDATE `app_item` SET `featured` = 1 WHERE `title` = '伞面丹青';
+
+-- ============================================================
+-- 站点统计计数表 app_stat（听雨人次等）
+-- 说明：start-backend.bat 仅在 boonie 库不存在时才导入本文件；
+--       已存在的旧库由后端 DbInitRunner 的 CREATE TABLE IF NOT EXISTS 兜底，
+--       此处一并写入以保证「全新库」与「已有库」最终状态一致。
+-- ============================================================
+DROP TABLE IF EXISTS `app_stat`;
+CREATE TABLE `app_stat` (
+  `id`         BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `code`       VARCHAR(32)  NOT NULL                COMMENT '统计项编码（如 listen_rain）',
+  `cnt`        BIGINT       NOT NULL DEFAULT 0      COMMENT '计数',
+  `updated_at` DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_code` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+  COMMENT='站点统计计数';
+
+INSERT INTO `app_stat` (`code`, `cnt`) VALUES ('listen_rain', 0);

@@ -15,7 +15,7 @@ import { useRouter } from 'vue-router'
 
 import { useUserStore } from '@/stores/user'
 import { useReveal } from '@/composables/useReveal'
-import { search, fetchHome } from '@/api/search'
+import { search, fetchHome, fetchStats } from '@/api/search'
 import InkMotif from '@/components/InkMotif.vue'
 
 const router = useRouter()
@@ -44,8 +44,20 @@ const navItems = ref([
 /* 热门词：同样静态兜底 + 接口覆盖 */
 const hotWords = ref(['油纸伞', '江湖徽章', '行侠日志', '侠客同游', '账号设置'])
 
+/* 精选条目：来自 /api/home 的 featured（最多 6 条），接口失败时回退到静态兜底 */
+const featured = ref([])
+const fallbackFeatured = [
+  { id: 1, category: 'umbrella', ic: '🌂', title: '青竹油纸伞', desc: '伞骨以三年青竹剖篾，桐油七遍，雨打不漏。' },
+  { id: 2, category: 'badge', ic: '🏅', title: '江湖同心徽', desc: '侠客结义所持，朱砂为印，金线绕边。' },
+  { id: 3, category: 'jianghu', ic: '⚔️', title: '听雨剑谱', desc: '剑意如雨，绵绵不绝，后劲藏于收敛。' },
+  { id: 4, category: 'log', ic: '📜', title: '行侠手札', desc: '记一路风雨与相逢，墨淡而情长。' },
+]
+
 /* 全量分类（含子类，来自 /api/home），用于子分类筛选与名称解析 */
 const categories = ref([])
+
+/* 数字速览（来自 /api/stats），后端未就绪时回退到静态兜底 */
+const stats = ref({ itemCount: 22, categoryCount: 6, listenRain: 0 })
 
 /**
  * 当前选中分类的顶级编码：选中子分类时高亮其父级导航页签
@@ -127,6 +139,71 @@ function buildRain() {
   }
 }
 
+/* 分类检索区锚点（卷首语「入阁拾遗」平滑滚动到此） */
+const contentRef = ref(null)
+
+/* 每日诗笺：按日期轮换一句江湖烟雨诗，让首页有「活」的气息 */
+const verses = [
+  '一蓑烟雨任平生',
+  '小楼一夜听春雨，深巷明朝卖杏花',
+  '竹杖芒鞋轻胜马，谁怕',
+  '落花人独立，微雨燕双飞',
+  '青箬笠，绿蓑衣，斜风细雨不须归',
+  '自在飞花轻似梦，无边丝雨细如愁',
+  '回首向来萧瑟处，归去，也无风雨也无晴',
+  '江雨霏霏江草齐，六朝如梦鸟空啼',
+]
+const dailyVerse = computed(() => {
+  const day = Math.floor(Date.now() / 86400000)
+  return verses[day % verses.length]
+})
+
+/* 江湖诗笺：独立板块，可点「换一句」切换；默认落在今日轮换句 */
+const poemBook = [
+  { t: '小楼一夜听春雨，深巷明朝卖杏花', s: '陆游《临安春雨初霁》' },
+  { t: '一蓑烟雨任平生', s: '苏轼《定风波》' },
+  { t: '竹杖芒鞋轻胜马，谁怕？一蓑烟雨任平生', s: '苏轼《定风波》' },
+  { t: '落花人独立，微雨燕双飞', s: '晏几道《临江仙》' },
+  { t: '青箬笠，绿蓑衣，斜风细雨不须归', s: '张志和《渔歌子》' },
+  { t: '自在飞花轻似梦，无边丝雨细如愁', s: '秦观《浣溪沙》' },
+  { t: '回首向来萧瑟处，归去，也无风雨也无晴', s: '苏轼《定风波》' },
+  { t: '江雨霏霏江草齐，六朝如梦鸟空啼', s: '韦庄《台城》' },
+  { t: '春水碧于天，画船听雨眠', s: '韦庄《菩萨蛮》' },
+  { t: '细雨湿衣看不见，闲花落地听无声', s: '刘长卿《别严士元》' },
+  { t: '水光潋滟晴方好，山色空蒙雨亦奇', s: '苏轼《饮湖上初晴后雨》' },
+  { t: '墨痕未干山欲雨，纸窗竹影共清寒', s: '烟雨阁·佚名' },
+]
+const poemIndex = ref(Math.floor(Date.now() / 86400000) % poemBook.length)
+function changePoem() {
+  let n = poemIndex.value
+  while (n === poemIndex.value && poemBook.length > 1) {
+    n = Math.floor(Math.random() * poemBook.length)
+  }
+  poemIndex.value = n
+}
+
+/* 听雨佳绩（读小游戏本地存档，serene=悠然听雨 最贴合慢节奏） */
+const gameBest = ref(0)
+function loadGameBest() {
+  try {
+    const raw = localStorage.getItem('boonie-rain-best')
+    if (raw) {
+      const o = JSON.parse(raw)
+      gameBest.value = Math.max(o.serene || 0, o.storm || 0)
+    }
+  } catch {
+    /* 损坏数据忽略 */
+  }
+}
+
+/* 入阁拾遗：平滑滚动到分类检索区 */
+function scrollToContent() {
+  contentRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+function goGame() {
+  router.push({ name: 'game' })
+}
+
 /* ---------------- 调用后端搜索接口 ---------------- */
 async function runSearch() {
   loading.value = true
@@ -180,7 +257,15 @@ onMounted(async () => {
       }
     }
     if (Array.isArray(d.hotWords) && d.hotWords.length) hotWords.value = d.hotWords
+    if (Array.isArray(d.featured) && d.featured.length) featured.value = d.featured
+    else featured.value = fallbackFeatured
   }
+
+  // 数字速览（藏品数 / 分类数 / 听雨人次），后端失败保留静态兜底
+  const statsRes = await fetchStats()
+  if (statsRes.success && statsRes.data) stats.value = statsRes.data
+
+  loadGameBest()
 })
 
 onBeforeUnmount(() => {
@@ -244,8 +329,79 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
+    <!-- ============ 卷首语（主旨呈现） ============ -->
+    <section class="prologue reveal">
+      <!-- 藏阁卷首：AI 水墨横幅做背景，羽化融入纸面 -->
+      <div class="prologue-bg" aria-hidden="true"></div>
+      <span class="seal seal-mark prologue-seal">慢</span>
+      <p class="prologue-verse">「{{ dailyVerse }}」</p>
+      <h2 class="prologue-title">卷首语 · 一座可慢下来的江湖藏阁</h2>
+      <p class="prologue-text">
+        离恨烟·烟雨阁，是一座以水墨为骨、以闲情为魂的江湖藏阁。在这里，检索是「拾遗」，阅读是「展卷」，小憩是「听雨」——
+        慢一点，再慢一点，方见烟雨本色。
+      </p>
+      <div class="prologue-cta">
+        <button type="button" class="btn primary" @click="scrollToContent">入阁拾遗</button>
+        <button type="button" class="btn ghost" @click="goGame">伞下听雨</button>
+      </div>
+      <!-- 数字速览（真实统计：藏品 / 分类 / 听雨人次） -->
+      <div class="prologue-stats">
+        <div class="pstat">
+          <b>{{ stats.itemCount }}</b>
+          <span>阁中藏品</span>
+        </div>
+        <div class="pstat">
+          <b>{{ stats.categoryCount }}</b>
+          <span>江湖门类</span>
+        </div>
+        <div class="pstat">
+          <b>{{ stats.listenRain }}</b>
+          <span>听雨人次</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 阁中珍藏（精选条目） ============ -->
+    <section v-if="featured.length" class="treasure reveal">
+      <div class="treasure-head">
+        <h2 class="treasure-title">阁中珍藏</h2>
+        <span class="treasure-sub">馆主私藏 · 雨过天青时最宜展读</span>
+      </div>
+      <div class="treasure-strip">
+        <article
+          v-for="(item, i) in featured"
+          :key="'feat|' + item.id"
+          class="hcard card-pop"
+          :style="{ animationDelay: `${Math.min(i, 8) * 70}ms` }"
+          @click="goDetail(item.id)"
+          @mousemove="cardSpot"
+        >
+          <span class="hcard-corner tl"></span>
+          <span class="hcard-corner tr"></span>
+          <span class="hcard-corner bl"></span>
+          <span class="hcard-corner br"></span>
+          <InkMotif :cat="item.category" class="hcard-motif" />
+          <div class="hcard-ic">{{ item.ic }}</div>
+          <h3 class="hcard-title">{{ item.title }}</h3>
+          <p class="hcard-desc">{{ item.desc }}</p>
+          <button type="button" class="hcard-link">展卷 ›</button>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============ 江湖诗笺（独立板块 · 可换一句） ============ -->
+    <section class="poem reveal">
+      <div class="poem-card">
+        <span class="seal seal-mark poem-seal">笺</span>
+        <p class="poem-label">江 湖 诗 笺</p>
+        <p class="poem-text">「{{ poemBook[poemIndex].t }}」</p>
+        <p class="poem-src">{{ poemBook[poemIndex].s }}</p>
+        <button type="button" class="btn ghost poem-btn" @click="changePoem">换 一 句 ↻</button>
+      </div>
+    </section>
+
     <!-- ============ 导航栏（分类切换） ============ -->
-    <nav class="home-nav reveal">
+    <nav ref="contentRef" class="home-nav reveal">
       <button
         v-for="item in navItems"
         :key="item.key"
@@ -309,6 +465,26 @@ onBeforeUnmount(() => {
         <button type="button" class="btn ghost" @click="onClear">清 空 重 搜</button>
       </div>
     </div>
+
+    <!-- ============ 伞下听雨（小游戏入口） ============ -->
+    <section class="rain-entry reveal">
+      <div class="rain-entry-inner">
+        <div class="rain-entry-text">
+          <span class="seal seal-mark rain-entry-seal">听</span>
+          <h2 class="rain-entry-title">伞下听雨</h2>
+          <p class="rain-entry-desc">
+            撑一柄油纸伞，接住落下的雨珠、飞花与朱砂小印。无失败惩罚，雨势可调——
+            一场治愈系的烟雨小憩，正合慢节奏。
+          </p>
+          <p class="rain-entry-best" v-if="gameBest > 0">最佳佳绩 · {{ gameBest }} 分</p>
+          <p class="rain-entry-best" v-else>尚未拾雨，今番不妨一试</p>
+        </div>
+        <div class="rain-entry-art">
+          <InkMotif cat="game" class="rain-entry-motif" />
+        </div>
+      </div>
+      <button type="button" class="btn primary rain-entry-btn" @click="goGame">入 阁 听 雨</button>
+    </section>
   </section>
 </template>
 
@@ -809,6 +985,297 @@ onBeforeUnmount(() => {
   margin-bottom: 22px;
 }
 
+/* ============ 卷首语（主旨呈现） ============ */
+.prologue {
+  position: relative;
+  z-index: 2;
+  max-width: 760px;
+  margin: 8px auto 18px;
+  padding: 36px 40px 38px;
+  text-align: center;
+  background: linear-gradient(160deg, rgba(250, 248, 240, 0.82), rgba(240, 238, 228, 0.7));
+  border: 1px solid rgba(201, 163, 92, 0.4);
+  border-radius: 8px;
+  backdrop-filter: blur(6px);
+  overflow: hidden;
+}
+/* 内容层抬到背景图之上，保证文字清晰 */
+.prologue > :not(.prologue-bg) {
+  position: relative;
+  z-index: 1;
+}
+/* 藏阁卷首水墨横幅：置于文字之后、纸面之上，边缘羽化 */
+.prologue-bg {
+  position: absolute;
+  inset: -10% -6% 0;
+  z-index: 0;
+  background: url('/ink-prologue.png') center 30% / cover no-repeat;
+  opacity: 0.26;
+  -webkit-mask-image: radial-gradient(125% 120% at 50% 22%, #000 52%, transparent 86%);
+  mask-image: radial-gradient(125% 120% at 50% 22%, #000 52%, transparent 86%);
+  pointer-events: none;
+}
+.prologue .prologue-seal {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-4deg);
+  width: 46px;
+  height: 46px;
+  font-size: 22px;
+  letter-spacing: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: seal-stamp 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
+}
+.prologue-verse {
+  font-size: 17px;
+  letter-spacing: 5px;
+  color: var(--cinnabar);
+  opacity: 0.9;
+  margin-bottom: 16px;
+}
+.prologue-title {
+  font-size: 23px;
+  font-weight: normal;
+  letter-spacing: 7px;
+  text-indent: 7px;
+  margin-bottom: 14px;
+}
+.prologue-text {
+  font-size: 15px;
+  line-height: 2.1;
+  letter-spacing: 2px;
+  color: var(--ink-soft);
+  margin-bottom: 26px;
+}
+.prologue-cta {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+
+/* 数字速览（真实统计：藏品 / 分类 / 听雨人次） */
+.prologue-stats {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 26px;
+  padding-top: 22px;
+  border-top: 1px dashed rgba(201, 163, 92, 0.35);
+}
+.prologue-stats .pstat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 92px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  background: rgba(250, 248, 240, 0.5);
+  border: 1px solid rgba(201, 163, 92, 0.22);
+}
+.prologue-stats .pstat b {
+  font-size: 26px;
+  font-weight: normal;
+  letter-spacing: 1px;
+  color: var(--jade);
+  line-height: 1.2;
+}
+.prologue-stats .pstat span {
+  font-size: 12px;
+  letter-spacing: 3px;
+  color: var(--ink-soft);
+  opacity: 0.75;
+  margin-top: 4px;
+}
+
+/* ============ 阁中珍藏（精选卷轴） ============ */
+.treasure {
+  position: relative;
+  z-index: 2;
+  margin: 14px 0 6px;
+}
+.treasure-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(201, 163, 92, 0.3);
+}
+.treasure-title {
+  font-size: 24px;
+  font-weight: normal;
+  letter-spacing: 7px;
+  text-indent: 7px;
+}
+.treasure-sub {
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: var(--ink-soft);
+  opacity: 0.7;
+}
+.treasure-strip {
+  display: flex;
+  gap: 22px;
+  overflow-x: auto;
+  padding: 6px 2px 18px;
+  scroll-snap-type: x mandatory;
+}
+.treasure-strip .hcard {
+  flex: 0 0 260px;
+  scroll-snap-align: start;
+}
+.treasure-strip::-webkit-scrollbar {
+  height: 8px;
+}
+.treasure-strip::-webkit-scrollbar-thumb {
+  background: rgba(163, 127, 61, 0.4);
+  border-radius: 999px;
+}
+.treasure-strip::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ============ 江湖诗笺（独立板块 · 可换一句） ============ */
+.poem {
+  position: relative;
+  z-index: 2;
+  margin: 6px 0 4px;
+  display: flex;
+  justify-content: center;
+}
+.poem-card {
+  position: relative;
+  width: 100%;
+  max-width: 620px;
+  padding: 30px 34px 32px;
+  text-align: center;
+  background: linear-gradient(160deg, rgba(250, 248, 240, 0.8), rgba(240, 238, 228, 0.68));
+  border: 1px solid rgba(201, 163, 92, 0.4);
+  border-radius: 8px;
+  backdrop-filter: blur(6px);
+}
+.poem-card .poem-seal {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-5deg);
+  width: 42px;
+  height: 42px;
+  font-size: 20px;
+  letter-spacing: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: seal-stamp 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
+}
+.poem-label {
+  font-size: 13px;
+  letter-spacing: 8px;
+  text-indent: 8px;
+  color: var(--gold-deep);
+  opacity: 0.8;
+  margin-bottom: 14px;
+}
+.poem-text {
+  font-size: 20px;
+  letter-spacing: 4px;
+  line-height: 1.9;
+  color: var(--ink);
+  margin-bottom: 10px;
+  min-height: 38px;
+  transition: opacity 0.35s, transform 0.35s;
+}
+.poem-src {
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--ink-soft);
+  opacity: 0.7;
+  margin-bottom: 22px;
+}
+.poem-btn {
+  letter-spacing: 5px;
+  text-indent: 5px;
+  padding: 9px 26px;
+  font-size: 14px;
+  transition: all 0.25s;
+}
+.poem-btn:hover {
+  letter-spacing: 7px;
+  text-indent: 7px;
+}
+
+/* ============ 伞下听雨入口 ============ */
+.rain-entry {
+  position: relative;
+  z-index: 2;
+  margin: 40px 0 10px;
+  padding: 34px 36px 36px;
+  border: 1px solid rgba(201, 163, 92, 0.45);
+  border-radius: 8px;
+  background:
+    radial-gradient(120% 140% at 88% 0%, rgba(78, 141, 134, 0.12), transparent 60%),
+    linear-gradient(160deg, rgba(250, 248, 240, 0.9), rgba(238, 240, 230, 0.82));
+  overflow: hidden;
+}
+.rain-entry-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+}
+.rain-entry-text {
+  flex: 1;
+  min-width: 0;
+}
+.rain-entry-seal {
+  position: absolute;
+  top: 18px;
+  right: 22px;
+  width: 44px;
+  height: 44px;
+  font-size: 20px;
+  letter-spacing: 0;
+  transform: rotate(6deg);
+  opacity: 0.9;
+}
+.rain-entry-title {
+  font-size: 26px;
+  font-weight: normal;
+  letter-spacing: 8px;
+  text-indent: 8px;
+  margin-bottom: 12px;
+}
+.rain-entry-desc {
+  font-size: 15px;
+  line-height: 2;
+  letter-spacing: 2px;
+  color: var(--ink-soft);
+  max-width: 520px;
+  margin-bottom: 14px;
+}
+.rain-entry-best {
+  font-size: 14px;
+  letter-spacing: 3px;
+  color: var(--gold-deep);
+  margin-bottom: 20px;
+}
+.rain-entry-art {
+  flex-shrink: 0;
+  width: 120px;
+  height: 120px;
+  color: var(--jade);
+  opacity: 0.5;
+  transform: rotate(-6deg);
+}
+.rain-entry-btn {
+  padding: 12px 36px;
+  letter-spacing: 8px;
+  text-indent: 8px;
+}
+
 /* ============ 响应式 ============ */
 @media (max-width: 960px) {
   .home-page { padding: 40px 20px 60px; }
@@ -820,5 +1287,14 @@ onBeforeUnmount(() => {
   .search-btn { order: 4; width: 100%; }
   .hero-seal { right: 2%; }
   .hero-banner { opacity: 0.4; }
+  .prologue { padding: 30px 22px 32px; }
+  .prologue-stats { flex-wrap: wrap; gap: 10px; }
+  .prologue-stats .pstat { min-width: 78px; padding: 6px 10px; }
+  .prologue-stats .pstat b { font-size: 22px; }
+  .poem-card { padding: 26px 20px 28px; }
+  .poem-text { font-size: 18px; letter-spacing: 2px; }
+  .rain-entry-inner { flex-direction: column; text-align: center; }
+  .rain-entry-art { display: none; }
+  .treasure-strip .hcard { flex-basis: 220px; }
 }
 </style>

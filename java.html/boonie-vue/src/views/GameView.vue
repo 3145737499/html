@@ -10,6 +10,7 @@
  */
 import { ref, reactive, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { recordRain } from '@/api/search'
 
 const router = useRouter()
 
@@ -793,6 +794,7 @@ function togglePause() {
 function endGame() {
   ended.value = true
   paused.value = false
+  recordRain() // 记录一次「伞下听雨」人次（后端 fire-and-forget）
 }
 
 function toggleAudio() {

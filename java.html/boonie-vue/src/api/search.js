@@ -46,6 +46,32 @@ export async function fetchHome() {
 }
 
 /**
+ * 首页数字速览（统计接口）
+ * GET /api/stats -> { success, message, data: { itemCount, categoryCount, listenRain } }
+ *   藏品数 / 分类数(顶级) / 听雨人次
+ */
+export async function fetchStats() {
+  try {
+    const res = await fetch('/api/stats')
+    return await res.json()
+  } catch (e) {
+    return { success: false, message: '江湖信号不通，稍后再试', data: null }
+  }
+}
+
+/**
+ * 记录一次「伞下听雨」人次（游戏结算时调用，fire-and-forget）
+ * POST /api/stats/rain
+ */
+export async function recordRain() {
+  try {
+    await fetch('/api/stats/rain', { method: 'POST' })
+  } catch (e) {
+    /* 后端未就绪 / 网络异常：静默忽略，不影响游戏体验 */
+  }
+}
+
+/**
  * 条目详情（详情页）
  * GET /api/item/{id} -> { success, message, data: { id, category, categoryName,
  *   parentCategory, parentCategoryName, ic, title, desc, detail(多段\n分隔), hot, featured, related } }

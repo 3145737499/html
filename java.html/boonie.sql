@@ -128,4 +128,27 @@ CREATE TABLE `app_user`  (
 INSERT INTO `app_user` VALUES (1, 'demo@boonie.com', '$2a$10$44/5E6LE8QMVfjA5plfxEOP34.sM80Vwga2SMvCYt0ucN2aUZY/Yy', 'demo@boonie.com', NULL, '烟雨阁少侠', '2026-10-14 08:34:13', '2026-10-14 08:34:13');
 INSERT INTO `app_user` VALUES (2, '123456789', '$2a$10$4z3PxKW0a3eNIn8zaiXtCechoilkmsLRLU.mFL/NkoIx94SlCB4Ki', NULL, '123456789', '123456789', '2026-10-14 08:35:03', '2026-10-14 08:35:03');
 
+-- ----------------------------
+-- 让「伞面丹青」进入首页精选（阁中珍藏卷轴更丰满）
+-- ----------------------------
+UPDATE `app_item` SET `featured` = 1 WHERE `title` = '伞面丹青';
+
+-- ----------------------------
+-- Table structure for app_stat
+-- ----------------------------
+DROP TABLE IF EXISTS `app_stat`;
+CREATE TABLE `app_stat`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `code` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '统计项编码（如 listen_rain）',
+  `cnt` bigint NOT NULL DEFAULT 0 COMMENT '计数',
+  `updated_at` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_code`(`code` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '站点统计计数' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of app_stat
+-- ----------------------------
+INSERT INTO `app_stat` VALUES (1, 'listen_rain', 0, '2026-10-21 00:00:00');
+
 SET FOREIGN_KEY_CHECKS = 1;
