@@ -7,10 +7,8 @@
 const BASE = '/api/auth'
 
 async function request(path, options = {}) {
-  const res = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
-    ...options,
-  })
+  const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) }
+  const res = await fetch(`${BASE}${path}`, { ...options, headers })
   if (!res.ok) {
     // 网络层 / 服务端 5xx 等异常
     return { success: false, message: `服务异常（HTTP ${res.status}），请稍后再试` }
@@ -40,4 +38,11 @@ export function login(account, password) {
 /** 登出：{ token } -> { success, message } */
 export function logout(token) {
   return post('/logout', { token })
+}
+
+/** 当前登录用户自身信息 -> { success, data: { account, role } } */
+export function fetchMe(token) {
+  return request('/me', {
+    headers: token ? { Authorization: 'Bearer ' + token } : {},
+  })
 }

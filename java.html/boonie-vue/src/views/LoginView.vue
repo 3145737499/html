@@ -14,7 +14,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { useLoginForm } from '@/composables/useLoginForm'
 import { celebrate } from '@/composables/useCelebrate'
-import { getCaptcha, register as apiRegister, login as apiLogin } from '@/api/auth'
+import { getCaptcha, register as apiRegister, login as apiLogin, fetchMe } from '@/api/auth'
 
 const router = useRouter()
 const route = useRoute()
@@ -191,6 +191,13 @@ async function onSubmit() {
     if (mode.value === 'login') {
       // 登录成功：保存账号与 token，进入主页
       user.login(acc, remember.value, res.token || '')
+      // 取回角色（决定是否展示「后台管理」入口），失败不影响登录
+      try {
+        const me = await fetchMe(res.token || '')
+        if (me.success && me.data) user.setRole(me.data.role)
+      } catch {
+        /* 忽略：角色仅影响入口展示 */
+      }
       setMsg('登录成功，伞下江湖见！', 'ok')
       celebrate()
       loading.value = false
@@ -236,6 +243,7 @@ async function guestLogin() {
     }
     // 记住我=false，游客态不持久化；展示名用「游客体验」
     user.login('游客体验', false, res.token || '')
+    user.setRole('') // 游客非管理员，不展示后台入口
     setMsg('游客入阁，伞下江湖见！', 'ok')
     celebrate()
     loading.value = false

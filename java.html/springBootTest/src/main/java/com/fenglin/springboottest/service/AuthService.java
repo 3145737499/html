@@ -30,8 +30,40 @@ public interface AuthService {
 	Result login(String account, String password);
 
 	/**
+	 * 后台管理员登录：仅校验 admin_user 表，成功返回 token
+	 * @param account  管理员账号
+	 * @param password 密码
+	 */
+	Result adminLogin(String account, String password);
+
+	/**
 	 * 登出：使 token 失效
 	 * @param token 登录时发放的 token
 	 */
 	Result logout(String token);
+
+	/**
+	 * 校验 token 是否有效（后台管理接口鉴权用）
+	 * @param token 登录时发放的 token
+	 */
+	boolean isTokenValid(String token);
+
+	/**
+	 * 根据 token 取登录账号（无效返回 null）
+	 * @param token 登录时发放的 token
+	 */
+	String getAccount(String token);
+
+	/**
+	 * 根据 token 取登录账号的角色（无效或缺失返回 null）
+	 * 后台 token 返回 'admin'；前台 token 返回 app_user.role
+	 * @param token 登录时发放的 token
+	 */
+	String getRole(String token);
+
+	/**
+	 * 是否为后台管理员（token 有效且账号角色为 admin）
+	 * @param token 登录时发放的 token
+	 */
+	boolean isAdmin(String token);
 }

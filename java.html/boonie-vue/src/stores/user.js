@@ -4,11 +4,13 @@ import { logout as apiLogout } from '@/api/auth'
 
 const STORAGE_KEY = 'bb_acc'
 const TOKEN_KEY = 'bb_token'
+const ROLE_KEY = 'bb_role'
 
 /**
  * 用户 / 登录状态
  * - account：登录账号（供「记住我」回填与问候语展示）
  * - token：后端签发的登录令牌（持久化，页面刷新不掉线）
+ * - role：角色（user=普通用户, admin=后台管理员），用于是否展示「后台管理」入口
  */
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -16,22 +18,27 @@ export const useUserStore = defineStore('user', {
     account: '',
     /** 登录令牌 */
     token: '',
+    /** 角色 */
+    role: '',
     /** 记住我 */
     remember: false,
   }),
 
   getters: {
     isLoggedIn: (state) => state.account !== '',
+    /** 是否为后台管理员 */
+    isAdmin: (state) => state.role === 'admin',
     /** 个人中心问候语 */
     greeting: (state) =>
       state.account ? `欢迎回来，${state.account}！` : '欢迎回来，烟雨阁少侠！',
   },
 
   actions: {
-    /** 从 localStorage 回填「记住我」的账号与登录令牌 */
+    /** 从 localStorage 回填「记住我」的账号、令牌与角色 */
     restore() {
       try {
         this.token = localStorage.getItem(TOKEN_KEY) || ''
+        this.role = localStorage.getItem(ROLE_KEY) || ''
         const saved = localStorage.getItem(STORAGE_KEY)
         if (saved) {
           this.remember = true
@@ -58,14 +65,27 @@ export const useUserStore = defineStore('user', {
       }
     },
 
+    /** 写入角色（登录后由 /api/auth/me 取回） */
+    setRole(role = '') {
+      this.role = role || ''
+      try {
+        if (this.role) localStorage.setItem(ROLE_KEY, this.role)
+        else localStorage.removeItem(ROLE_KEY)
+      } catch {
+        /* ignore */
+      }
+    },
+
     /** 退出登录：清理状态并通知后端作废 token（静默失败，不影响本地登出） */
     async logout() {
       const token = this.token
       this.account = ''
       this.token = ''
+      this.role = ''
       try {
         localStorage.removeItem(STORAGE_KEY)
         localStorage.removeItem(TOKEN_KEY)
+        localStorage.removeItem(ROLE_KEY)
       } catch {
         /* ignore */
       }

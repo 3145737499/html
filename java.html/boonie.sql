@@ -11,11 +11,31 @@
  Target Server Version : 80039 (8.0.39)
  File Encoding         : 65001
 
- Date: 14/10/2026 09:59:57
+ Date: 23/10/2026 16:54:26
 */
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
+
+-- ----------------------------
+-- Table structure for admin_user
+-- ----------------------------
+DROP TABLE IF EXISTS `admin_user`;
+CREATE TABLE `admin_user`  (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `account` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `password` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `nickname` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `created_at` datetime NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_account`(`account` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '鍚庡彴绠＄悊鍛樿〃' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of admin_user
+-- ----------------------------
+INSERT INTO `admin_user` VALUES (1, '314573', '$2a$10$Ufc93A8HLepLWO/fPtrKdut0AVfUPi3MI0umjFA4nK1w/YQp7.aiG', 'admin314573', '2026-10-23 16:50:01', '2026-10-23 16:50:01');
 
 -- ----------------------------
 -- Table structure for app_category
@@ -32,7 +52,7 @@ CREATE TABLE `app_category`  (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_code`(`code` ASC) USING BTREE,
   INDEX `idx_parent`(`parent_id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 19 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '内容分类表（分级）' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 19 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '内容分类表（分级）' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of app_category
@@ -75,14 +95,14 @@ CREATE TABLE `app_item`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_category`(`category_id` ASC) USING BTREE,
   INDEX `idx_title`(`title` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 23 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '内容条目表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 23 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '内容条目表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of app_item
 -- ----------------------------
 INSERT INTO `app_item` VALUES (1, 9, '🌂', '我的油纸伞', '查看你的纸伞与伞面丹青进度，撑一把属于自己的烟雨。', '每一把油纸伞都记录着主人的江湖。\n伞骨取自三年生楠竹，伞面覆以皮纸、刷足三遍桐油，方能撑得起江南一整季的烟雨。\n在这里查看你的纸伞品阶、伞面丹青进度与历次修缮记录——伞虽无言，伞下皆是故事。', 1, 0, 1, '2026-10-14 08:58:22', '2026-10-14 09:35:35');
 INSERT INTO `app_item` VALUES (2, 9, '🧴', '纸伞保养', '桐油三遍、伞骨轻抚，让你的纸伞多用十年。', '纸伞如剑，须常拂拭。\n雨后须撑开阴干，切忌暴晒；桐油每岁一补，伞骨关节处薄施蜡油。\n小筑匠人总结了七条保养口诀，照做一把伞多用十年，江湖人称「伞养人，人养伞」。', 0, 0, 2, '2026-10-14 08:58:22', '2026-10-14 09:35:35');
-INSERT INTO `app_item` VALUES (3, 10, '🎨', '伞面丹青', '在伞面上挥毫泼墨，绘制专属江湖山水。', '一方伞面，即一方山水。\n取青绿设色，以伞骨为皴、烟雨为染，泼墨于皮纸之上，画的是山水，落的是心境。\n每月丹青上品将悬于烟雨楼回廊，供四方侠客品评，获赞最多者可得鎏金伞骨一副。', 1, 0, 1, '2026-10-14 08:58:22', '2026-10-14 09:35:35');
+INSERT INTO `app_item` VALUES (3, 10, '🎨', '伞面丹青', '在伞面上挥毫泼墨，绘制专属江湖山水。', '一方伞面，即一方山水。\n取青绿设色，以伞骨为皴、烟雨为染，泼墨于皮纸之上，画的是山水，落的是心境。\n每月丹青上品将悬于烟雨楼回廊，供四方侠客品评，获赞最多者可得鎏金伞骨一副。', 1, 1, 1, '2026-10-14 08:58:22', '2026-10-23 16:26:23');
 INSERT INTO `app_item` VALUES (4, 10, '🌸', '节气伞面', '依二十四节气更换伞面丹青，春分桃花、夏至青荷。', '节气更迭，伞面随之。\n春分画桃花两枝，夏至点青荷一盏，秋分染桂香满伞，冬至留白等一场雪落。\n依节气更换伞面丹青，是烟雨阁延续百年的雅事——伞在手中，四季在眼中。', 0, 1, 2, '2026-10-14 08:58:22', '2026-10-14 09:35:35');
 INSERT INTO `app_item` VALUES (5, 7, '⚔️', '江湖动态', '阅尽四方侠客的行侠见闻与门派快讯。', '江湖每日都有新的传闻：谁家剑客雨夜过江，谁派掌门闭关练气。\n此处汇总四方侠客的行侠见闻与各门派快讯，一页阅尽江湖事。\n传闻七分真三分假，信与不信，全看阁下的江湖阅历。', 1, 0, 1, '2026-10-14 08:58:22', '2026-10-14 09:35:35');
 INSERT INTO `app_item` VALUES (6, 7, '🌦️', '烟雨快报', '每日烟雨指数播报，出门带伞提醒。', '今日烟雨指数：江南七成，塞北二成。\n出门宜带伞，宜访友，宜在檐下听一场雨；不宜赶路，不宜动刀兵。\n烟雨快报每日辰时更新，来自烟雨楼分布于各地的听雨郎。', 0, 0, 2, '2026-10-14 08:58:22', '2026-10-14 09:35:35');
@@ -104,36 +124,6 @@ INSERT INTO `app_item` VALUES (21, 17, '⚙️', '账号设置', '管理名号�
 INSERT INTO `app_item` VALUES (22, 18, '🔔', '消息提醒', '配置江湖动态与好友消息的提醒偏好。', '江湖消息多如雨点，取舍全凭本心。\n可分别设置：江湖动态（可关）、好友书信（建议开）、飞信救援（请务必开）。\n提醒方式可选檐下风铃或案头小灯，静音一时可以，静音一世不可。', 0, 0, 1, '2026-10-14 08:58:22', '2026-10-14 09:35:35');
 
 -- ----------------------------
--- Table structure for app_user
--- ----------------------------
-DROP TABLE IF EXISTS `app_user`;
-CREATE TABLE `app_user`  (
-  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `account` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '登录账号（邮箱或手机号）',
-  `password` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '密码（BCrypt 加密存储）',
-  `email` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '邮箱',
-  `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '手机号',
-  `nickname` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '昵称',
-  `created_at` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `updated_at` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `uk_account`(`account` ASC) USING BTREE,
-  INDEX `idx_email`(`email` ASC) USING BTREE,
-  INDEX `idx_phone`(`phone` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户表' ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Records of app_user
--- ----------------------------
-INSERT INTO `app_user` VALUES (1, 'demo@boonie.com', '$2a$10$44/5E6LE8QMVfjA5plfxEOP34.sM80Vwga2SMvCYt0ucN2aUZY/Yy', 'demo@boonie.com', NULL, '烟雨阁少侠', '2026-10-14 08:34:13', '2026-10-14 08:34:13');
-INSERT INTO `app_user` VALUES (2, '123456789', '$2a$10$4z3PxKW0a3eNIn8zaiXtCechoilkmsLRLU.mFL/NkoIx94SlCB4Ki', NULL, '123456789', '123456789', '2026-10-14 08:35:03', '2026-10-14 08:35:03');
-
--- ----------------------------
--- 让「伞面丹青」进入首页精选（阁中珍藏卷轴更丰满）
--- ----------------------------
-UPDATE `app_item` SET `featured` = 1 WHERE `title` = '伞面丹青';
-
--- ----------------------------
 -- Table structure for app_stat
 -- ----------------------------
 DROP TABLE IF EXISTS `app_stat`;
@@ -144,11 +134,38 @@ CREATE TABLE `app_stat`  (
   `updated_at` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_code`(`code` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '站点统计计数' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '站点统计计数' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of app_stat
 -- ----------------------------
 INSERT INTO `app_stat` VALUES (1, 'listen_rain', 0, '2026-10-21 00:00:00');
+
+-- ----------------------------
+-- Table structure for app_user
+-- ----------------------------
+DROP TABLE IF EXISTS `app_user`;
+CREATE TABLE `app_user`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `account` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '登录账号（邮箱或手机号）',
+  `password` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '密码（BCrypt 加密存储）',
+  `email` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '邮箱',
+  `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '手机号',
+  `nickname` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '昵称',
+  `role` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'user' COMMENT '瑙掕壊锛歶ser=鏅??鐢ㄦ埛, admin=鍚庡彴绠＄悊鍛',
+  `created_at` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_at` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_account`(`account` ASC) USING BTREE,
+  INDEX `idx_email`(`email` ASC) USING BTREE,
+  INDEX `idx_phone`(`phone` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of app_user
+-- ----------------------------
+INSERT INTO `app_user` VALUES (1, 'demo@boonie.com', '$2a$10$44/5E6LE8QMVfjA5plfxEOP34.sM80Vwga2SMvCYt0ucN2aUZY/Yy', 'demo@boonie.com', NULL, '烟雨阁少侠', 'user', '2026-10-14 08:34:13', '2026-10-14 08:34:13');
+INSERT INTO `app_user` VALUES (2, '123456789', '$2a$10$4z3PxKW0a3eNIn8zaiXtCechoilkmsLRLU.mFL/NkoIx94SlCB4Ki', NULL, '123456789', '123456789', 'user', '2026-10-14 08:35:03', '2026-10-14 08:35:03');
+INSERT INTO `app_user` VALUES (4, '314573', '$2a$10$7r3qDAQtU.K1CYfpztkAFOPKJDEz3aWkW31nvSaJ.AiS1sthGA4im', NULL, '314573', '314573', 'user', '2026-10-23 16:53:30', '2026-10-23 16:53:30');
 
 SET FOREIGN_KEY_CHECKS = 1;

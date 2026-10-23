@@ -29,6 +29,9 @@ public class User {
 
 	private String nickname;
 
+	/** 角色：user=普通用户, admin=后台管理员 */
+	private String role;
+
 	private LocalDateTime createdAt;
 
 	private LocalDateTime updatedAt;

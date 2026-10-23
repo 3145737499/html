@@ -20,8 +20,8 @@ user.restore()
     <InkPetals />
   </InkBackdrop>
 
-  <!-- 登录页为全屏立绘布局，隐藏导航与页脚 -->
-  <AppNav v-if="route.name !== 'login'" />
+  <!-- 登录页 / 后台登录页 / 后台管理页 为独立布局，隐藏全局导航与页脚 -->
+  <AppNav v-if="route.name !== 'login' && route.name !== 'admin-login' && route.name !== 'admin'" />
 
   <main>
     <!-- 路由过渡；mode="out-in" 时 vue 会自动串接动画 -->
@@ -32,7 +32,7 @@ user.restore()
     </RouterView>
   </main>
 
-  <footer v-if="route.name !== 'login'">© 2026 离恨烟 · 烟雨阁 · 本页面为演示作品</footer>
+  <footer v-if="route.name !== 'login' && route.name !== 'admin-login' && route.name !== 'admin'">© 2026 离恨烟 · 烟雨阁 · 本页面为演示作品</footer>
 </template>
 
 <style scoped>

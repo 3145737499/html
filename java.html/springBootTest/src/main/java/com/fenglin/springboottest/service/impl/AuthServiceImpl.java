@@ -2,7 +2,9 @@ package com.fenglin.springboottest.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.fenglin.springboottest.common.Result;
+import com.fenglin.springboottest.entity.AdminUser;
 import com.fenglin.springboottest.entity.User;
+import com.fenglin.springboottest.mapper.AdminUserMapper;
 import com.fenglin.springboottest.mapper.UserMapper;
 import com.fenglin.springboottest.service.AuthService;
 import org.slf4j.Logger;
@@ -39,6 +41,9 @@ public class AuthServiceImpl implements AuthService {
 
 	@Autowired
 	private UserMapper userMapper;
+
+	@Autowired
+	private AdminUserMapper adminUserMapper;
 
 	private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
@@ -163,6 +168,61 @@ public class AuthServiceImpl implements AuthService {
 			tokenMap.remove(token);
 		}
 		return Result.ok("已退出登录");
+	}
+
+	@Override
+	public Result adminLogin(String account, String password) {
+		if (account == null || account.isBlank() || password == null || password.isBlank()) {
+			return Result.fail("请输入账号和密码");
+		}
+		AdminUser admin = adminUserMapper.selectOne(
+				new LambdaQueryWrapper<AdminUser>().eq(AdminUser::getAccount, account));
+		if (admin == null) {
+			return Result.fail("账号不存在或无后台权限");
+		}
+		if (!encoder.matches(password, admin.getPassword())) {
+			return Result.fail("密码错误");
+		}
+		String token = "token-" + UUID.randomUUID();
+		tokenMap.put(token, account);
+		// data 带回账号，方便前端持久化登录态
+		Result r = Result.ok(token, "登录成功");
+		r.setData(account);
+		return r;
+	}
+
+	@Override
+	public boolean isTokenValid(String token) {
+		return token != null && tokenMap.containsKey(token);
+	}
+
+	@Override
+	public String getAccount(String token) {
+		return token == null ? null : tokenMap.get(token);
+	}
+
+	@Override
+	public String getRole(String token) {
+		String account = getAccount(token);
+		if (account == null) return null;
+		// 后台 token：账号存在于 admin_user 表
+		if (adminUserMapper.selectCount(
+				new LambdaQueryWrapper<AdminUser>().eq(AdminUser::getAccount, account)) > 0) {
+			return "admin";
+		}
+		// 前台 token：取 app_user 的角色
+		User u = userMapper.selectOne(
+				new LambdaQueryWrapper<User>().eq(User::getAccount, account));
+		return u == null ? null : u.getRole();
+	}
+
+	@Override
+	public boolean isAdmin(String token) {
+		String account = getAccount(token);
+		if (account == null) return false;
+		User u = userMapper.selectOne(
+				new LambdaQueryWrapper<User>().eq(User::getAccount, account));
+		return u != null && "admin".equals(u.getRole());
 	}
 
 	/**
