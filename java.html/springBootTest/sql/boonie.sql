@@ -24,6 +24,7 @@ CREATE TABLE `app_user` (
   `email`       VARCHAR(64)  DEFAULT NULL            COMMENT '邮箱',
   `phone`       VARCHAR(20)  DEFAULT NULL            COMMENT '手机号',
   `nickname`    VARCHAR(64)  DEFAULT NULL            COMMENT '昵称',
+  `role`        VARCHAR(16)  NOT NULL DEFAULT 'user' COMMENT '角色：user=普通用户, admin=后台管理员',
   `created_at`  DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `updated_at`  DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`),
@@ -37,8 +38,29 @@ CREATE TABLE `app_user` (
 -- 种子数据：演示账号
 -- 账号 demo@boonie.com，密码 123456（BCrypt 已加密）
 -- ------------------------------------------------------------
-INSERT INTO `app_user` (`account`, `password`, `email`, `nickname`) VALUES
-('demo@boonie.com', '$2a$10$44/5E6LE8QMVfjA5plfxEOP34.sM80Vwga2SMvCYt0ucN2aUZY/Yy', 'demo@boonie.com', '烟雨阁少侠');
+INSERT INTO `app_user` (`account`, `password`, `email`, `nickname`, `role`) VALUES
+('demo@boonie.com', '$2a$10$44/5E6LE8QMVfjA5plfxEOP34.sM80Vwga2SMvCYt0ucN2aUZY/Yy', 'demo@boonie.com', '烟雨阁少侠', 'user');
+
+-- ------------------------------------------------------------
+-- 后台管理员表 admin_user（与前台 app_user 完全隔离）
+-- AuthServiceImpl.getRole/isAdmin 依据「账号是否存在于此表」判定管理员，
+-- 缺失该表会导致每次登录/查询角色都报 Table 'boonie.admin_user' doesn't exist
+-- ------------------------------------------------------------
+DROP TABLE IF EXISTS `admin_user`;
+CREATE TABLE `admin_user` (
+  `id`          BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `account`     VARCHAR(64)  NOT NULL                COMMENT '登录账号',
+  `password`    VARCHAR(100) NOT NULL                COMMENT '密码（BCrypt 加密存储）',
+  `nickname`    VARCHAR(64)  DEFAULT NULL            COMMENT '昵称',
+  `created_at`  DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_at`  DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_admin_account` (`account`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='后台管理员表';
+
+-- 默认管理员：admin@boonie.com / 123456（BCrypt 哈希，与演示账号同款密码）
+INSERT INTO `admin_user` (`account`, `password`, `nickname`) VALUES
+('admin@boonie.com', '$2a$10$44/5E6LE8QMVfjA5plfxEOP34.sM80Vwga2SMvCYt0ucN2aUZY/Yy', '阁主');
 
 -- ============================================================
 -- 离恨烟·烟雨阁 —— 首页搜索/展示功能建表脚本（2026-10-14）

@@ -146,17 +146,31 @@ public class AuthServiceImpl implements AuthService {
 		if (account == null || account.isBlank() || password == null || password.isBlank()) {
 			return Result.fail("请输入账号和密码");
 		}
+		// 前台用户：app_user
 		User user = userMapper.selectOne(
 				new LambdaQueryWrapper<User>().eq(User::getAccount, account));
-		if (user == null) {
-			return Result.fail("账号不存在");
+		if (user != null) {
+			if (!encoder.matches(password, user.getPassword())) {
+				return Result.fail("密码错误");
+			}
+			return issueToken(account);
 		}
-		if (!encoder.matches(password, user.getPassword())) {
-			return Result.fail("密码错误");
+		// 后台管理员：admin_user（与前台账号完全隔离）
+		AdminUser admin = adminUserMapper.selectOne(
+				new LambdaQueryWrapper<AdminUser>().eq(AdminUser::getAccount, account));
+		if (admin != null) {
+			if (!encoder.matches(password, admin.getPassword())) {
+				return Result.fail("密码错误");
+			}
+			return issueToken(account);
 		}
+		return Result.fail("账号不存在");
+	}
+
+	/** 签发登录 token 并回带账号，供前端持久化登录态 */
+	private Result issueToken(String account) {
 		String token = "token-" + UUID.randomUUID();
 		tokenMap.put(token, account);
-		// data 带回账号，方便前端持久化登录态
 		Result r = Result.ok(token, "登录成功");
 		r.setData(account);
 		return r;
@@ -218,11 +232,8 @@ public class AuthServiceImpl implements AuthService {
 
 	@Override
 	public boolean isAdmin(String token) {
-		String account = getAccount(token);
-		if (account == null) return false;
-		User u = userMapper.selectOne(
-				new LambdaQueryWrapper<User>().eq(User::getAccount, account));
-		return u != null && "admin".equals(u.getRole());
+		// 与管理员判定保持一致：账号存在于 admin_user 表即视为后台管理员
+		return "admin".equals(getRole(token));
 	}
 
 	/**
