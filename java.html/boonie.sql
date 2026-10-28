@@ -11,7 +11,7 @@
  Target Server Version : 80039 (8.0.39)
  File Encoding         : 65001
 
- Date: 23/10/2026 16:54:26
+ Date: 28/10/2026 09:48:20
 */
 
 SET NAMES utf8mb4;
@@ -30,12 +30,13 @@ CREATE TABLE `admin_user`  (
   `updated_at` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_account`(`account` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '鍚庡彴绠＄悊鍛樿〃' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '鍚庡彴绠＄悊鍛樿〃' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of admin_user
 -- ----------------------------
 INSERT INTO `admin_user` VALUES (1, '314573', '$2a$10$Ufc93A8HLepLWO/fPtrKdut0AVfUPi3MI0umjFA4nK1w/YQp7.aiG', 'admin314573', '2026-10-23 16:50:01', '2026-10-23 16:50:01');
+INSERT INTO `admin_user` VALUES (2, 'admin@boonie.com', '$2a$10$44/5E6LE8QMVfjA5plfxEOP34.sM80Vwga2SMvCYt0ucN2aUZY/Yy', '阁主', '2026-10-28 08:59:05', '2026-10-28 08:59:05');
 
 -- ----------------------------
 -- Table structure for app_category
@@ -52,7 +53,7 @@ CREATE TABLE `app_category`  (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_code`(`code` ASC) USING BTREE,
   INDEX `idx_parent`(`parent_id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 19 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '内容分类表（分级）' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 22 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '内容分类表（分级）' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of app_category
@@ -75,6 +76,9 @@ INSERT INTO `app_category` VALUES (15, 5, 'mate', '侠客结识', 1, '2026-10-14
 INSERT INTO `app_category` VALUES (16, 5, 'letter', '飞鸽传书', 2, '2026-10-14 08:58:22', '2026-10-14 08:58:22');
 INSERT INTO `app_category` VALUES (17, 6, 'account', '账号设置', 1, '2026-10-14 08:58:22', '2026-10-14 08:58:22');
 INSERT INTO `app_category` VALUES (18, 6, 'notify', '消息提醒', 2, '2026-10-14 08:58:22', '2026-10-14 08:58:22');
+INSERT INTO `app_category` VALUES (19, 4, 'poem_bridge', '桥上诗', 3, '2026-10-28 08:59:05', '2026-10-28 08:59:05');
+INSERT INTO `app_category` VALUES (20, 4, 'poem_sun', '岁晚诗', 4, '2026-10-28 08:59:05', '2026-10-28 08:59:05');
+INSERT INTO `app_category` VALUES (21, 4, 'poem_mirror', '镜花诗', 5, '2026-10-28 09:37:24', '2026-10-28 09:37:24');
 
 -- ----------------------------
 -- Table structure for app_item
@@ -95,7 +99,7 @@ CREATE TABLE `app_item`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_category`(`category_id` ASC) USING BTREE,
   INDEX `idx_title`(`title` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 23 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '内容条目表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 26 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '内容条目表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of app_item
@@ -122,6 +126,9 @@ INSERT INTO `app_item` VALUES (19, 16, '💌', '飞鸽传书', '与江湖好友�
 INSERT INTO `app_item` VALUES (20, 16, '🕊️', '急救飞信', '江湖遇险一键飞鸽，十里之内必有侠客来援。', '江湖险恶，遇险莫慌。\n点开急救飞信，放出一羽白鸽——十里之内，必有侠客来援。\n烟雨阁承诺：凡收信救援者，不论门派恩怨，风雨必至。此鸽一日千里，从无延误。', 0, 0, 2, '2026-10-14 08:58:22', '2026-10-14 09:35:35');
 INSERT INTO `app_item` VALUES (21, 17, '⚙️', '账号设置', '管理名号、密码与登录方式。', '在此打理你在烟雨阁的名号。\n可改江湖名号、更换印鉴头像、修改口令，或绑定新的登录方式。\n名号是你在江湖的脸面，改之前不妨再读一遍烟雨楼的规矩：名号一改，旧帖作废。', 0, 0, 1, '2026-10-14 08:58:22', '2026-10-14 09:35:35');
 INSERT INTO `app_item` VALUES (22, 18, '🔔', '消息提醒', '配置江湖动态与好友消息的提醒偏好。', '江湖消息多如雨点，取舍全凭本心。\n可分别设置：江湖动态（可关）、好友书信（建议开）、飞信救援（请务必开）。\n提醒方式可选檐下风铃或案头小灯，静音一时可以，静音一世不可。', 0, 0, 1, '2026-10-14 08:58:22', '2026-10-14 09:35:35');
+INSERT INTO `app_item` VALUES (23, 19, '🌉', '桥上看景', '你站在桥上看风景，看风景的人在楼上看你。', '桥上看景，楼上看人。\n此笺取自卞之琳《断章》——你以为在看风景，却不知自己也成了别人的风景。\n烟雨阁藏此一联，提醒过客：江湖之大，人人皆是观者，亦皆是被观之人。', 0, 1, 1, '2026-10-28 08:59:05', '2026-10-28 08:59:05');
+INSERT INTO `app_item` VALUES (24, 20, '☀️', '岁晚风暖', '风清日暖，正是人间岁晚时。', '风清日暖，岁晚情长。\n一年将尽，檐角风铃轻响，案头热茶正温。此笺写给每一个在江湖奔波后，仍愿慢下来的人。\n岁晚不是终点，是又一程烟雨的起点。', 0, 1, 2, '2026-10-28 08:59:05', '2026-10-28 08:59:05');
+INSERT INTO `app_item` VALUES (25, 21, '🌸', '镜花辞树', '最是人间留不住，朱颜辞镜花辞树。', '最是人间留不住。朱颜辞镜，是少年容颜终要从镜中老去；花辞树，是枝头繁花终要离枝零落。王国维以一句道尽无常——人间最留不住的，从来是春光与少年。烟雨阁藏此一笺，愿你惜取眼前人与当下景。', 0, 1, 3, '2026-10-28 09:37:24', '2026-10-28 09:37:24');
 
 -- ----------------------------
 -- Table structure for app_stat
@@ -134,7 +141,7 @@ CREATE TABLE `app_stat`  (
   `updated_at` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_code`(`code` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '站点统计计数' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '站点统计计数' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of app_stat

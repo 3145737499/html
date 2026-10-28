@@ -118,12 +118,12 @@ public class SearchServiceImpl implements SearchService {
 				.map(AppItem::getTitle)
 				.collect(Collectors.toList());
 
-		// 精选条目（featured=1，最多 6 个）
+		// 精选条目（featured=1，最多 10 个；含三张诗笺藏品）
 		List<AppItem> featuredItems = itemMapper.selectList(
 				new LambdaQueryWrapper<AppItem>()
 						.eq(AppItem::getFeatured, 1)
 						.orderByAsc(AppItem::getSortOrder)
-						.last("LIMIT 6"));
+						.last("LIMIT 10"));
 		List<ItemVO> featured = featuredItems.stream()
 				.map(i -> toItemVO(i, codeById))
 				.collect(Collectors.toList());

@@ -53,11 +53,40 @@ const fallbackFeatured = [
   { id: 4, category: 'log', ic: '📜', title: '行侠手札', desc: '记一路风雨与相逢，墨淡而情长。' },
 ]
 
+/* 诗笺主题藏品：以三句江湖诗为引，始终并入「阁中珍藏」，与别的卡片功能相同
+ * - id 23 桥上看景：你站在桥上看风景，看风景的人在楼上看你（桥/楼意象）
+ * - id 24 岁晚风暖：风清日暖，正是人间岁晚时（暖日/岁晚意象）
+ * - id 25 镜花辞树：最是人间留不住，朱颜辞镜花辞树（镜/花辞树意象）
+ * 后端就绪后由数据库提供（同 id），此处作为兜底与常驻展示；category 直接驱动 InkMotif 母题 */
+const extraFeatured = ref([
+  {
+    id: 23,
+    category: 'bridge',
+    ic: '🌉',
+    title: '桥上看景',
+    desc: '你站在桥上看风景，看风景的人在楼上看你。',
+  },
+  {
+    id: 24,
+    category: 'sun',
+    ic: '☀️',
+    title: '岁晚风暖',
+    desc: '风清日暖，正是人间岁晚时。',
+  },
+  {
+    id: 25,
+    category: 'mirror',
+    ic: '🌸',
+    title: '镜花辞树',
+    desc: '最是人间留不住，朱颜辞镜花辞树。',
+  },
+])
+
 /* 全量分类（含子类，来自 /api/home），用于子分类筛选与名称解析 */
 const categories = ref([])
 
 /* 数字速览（来自 /api/stats），后端未就绪时回退到静态兜底 */
-const stats = ref({ itemCount: 22, categoryCount: 6, listenRain: 0 })
+const stats = ref({ itemCount: 25, categoryCount: 6, listenRain: 0 })
 
 /**
  * 当前选中分类的顶级编码：选中子分类时高亮其父级导航页签
@@ -257,8 +286,13 @@ onMounted(async () => {
       }
     }
     if (Array.isArray(d.hotWords) && d.hotWords.length) hotWords.value = d.hotWords
-    if (Array.isArray(d.featured) && d.featured.length) featured.value = d.featured
-    else featured.value = fallbackFeatured
+    // 精选：先取后端 featured；再常驻并入两张诗笺卡片（按 id 去重，避免后端已返回时重复）
+    if (Array.isArray(d.featured) && d.featured.length) {
+      const seen = new Set(d.featured.map((x) => x.id))
+      featured.value = [...d.featured, ...extraFeatured.value.filter((x) => !seen.has(x.id))]
+    } else {
+      featured.value = [...fallbackFeatured, ...extraFeatured.value]
+    }
   }
 
   // 数字速览（藏品数 / 分类数 / 听雨人次），后端失败保留静态兜底

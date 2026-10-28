@@ -19,6 +19,9 @@ const kind = computed(() => {
   if (c.includes('setting')) return 'gear'
   if (c.includes('game')) return 'rain'
   if (c.includes('jianghu') || c.includes('dynamic') || c.includes('sect')) return 'sword'
+  if (c.includes('bridge')) return 'bridge'
+  if (c.includes('sun')) return 'sun'
+  if (c.includes('mirror')) return 'mirror'
   return 'mountain'
 })
 </script>
@@ -84,6 +87,52 @@ const kind = computed(() => {
       <path d="M6 48 L22 26 L32 40 L40 30 L58 48" />
       <circle cx="48" cy="15" r="5" opacity=".7" />
       <path d="M14 54 L14 57 M26 54 L26 58 M38 54 L38 57 M50 54 L50 58" opacity=".6" />
+    </g>
+
+    <!-- 桥上看景（桥拱 + 楼台 + 桥上/楼上两个看景人） -->
+    <g v-else-if="kind === 'bridge'">
+      <path d="M6 40 Q32 20 58 40" />
+      <path d="M6 40 H58" />
+      <path d="M14 40 V33 M22 40 V34 M30 40 V32 M38 40 V34 M46 40 V33 M54 40 V34" opacity=".7" />
+      <!-- 楼（右侧亭台，看你的人所在） -->
+      <path d="M46 22 L53 17 L60 22 Z" />
+      <path d="M47 22 V38 H59 V22" />
+      <!-- 桥上小人（看风景的你） -->
+      <circle cx="26" cy="29" r="2.2" />
+      <path d="M26 31 V37 M26 32 L23 34 M26 32 L29 34" />
+      <!-- 楼上小人（看风景的人） -->
+      <circle cx="53" cy="29" r="2" opacity=".85" />
+      <path d="M53 31 V37" opacity=".85" />
+    </g>
+
+    <!-- 岁晚风暖（暖日 + 岁晚细枝微叶） -->
+    <g v-else-if="kind === 'sun'">
+      <circle cx="32" cy="25" r="9" />
+      <path d="M32 9 V13 M32 37 V41 M16 25 H20 M44 25 H48 M20 13 L23 16 M44 13 L41 16 M20 37 L23 34 M44 37 L41 34" opacity=".8" />
+      <!-- 岁晚细枝 -->
+      <path d="M22 52 Q32 47 46 49" opacity=".7" />
+      <path d="M30 50 c-4 -1 -6 -4 -6 -7 c4 1 6 4 6 7 Z" fill="currentColor" opacity=".45" />
+      <path d="M40 50 c4 -1 6 -4 6 -7 c-4 1 -6 4 -6 7 Z" fill="currentColor" opacity=".45" />
+    </g>
+
+    <!-- 镜花辞树（镜 + 枝头花 + 飘落花瓣，皆留不住） -->
+    <g v-else-if="kind === 'mirror'">
+      <!-- 镜（朱颜辞镜）-->
+      <ellipse cx="22" cy="28" rx="11" ry="14" />
+      <path d="M22 42 V47" />
+      <path d="M15 53 L22 47 L29 53" opacity=".8" />
+      <!-- 枝（花辞树）-->
+      <path d="M58 12 Q50 20 47 33" opacity=".7" />
+      <path d="M52 18 Q56 20 58 24" opacity=".6" />
+      <!-- 枝头花 -->
+      <circle cx="47" cy="13" r="2" fill="currentColor" />
+      <ellipse cx="47" cy="8" rx="1.6" ry="2.4" fill="currentColor" opacity=".6" />
+      <ellipse cx="52" cy="13" rx="2.4" ry="1.6" fill="currentColor" opacity=".6" />
+      <ellipse cx="47" cy="18" rx="1.6" ry="2.4" fill="currentColor" opacity=".6" />
+      <ellipse cx="42" cy="13" rx="2.4" ry="1.6" fill="currentColor" opacity=".6" />
+      <!-- 飘落花瓣（留不住）-->
+      <path d="M33 34 c-3 -1 -4 -4 -1 -6 c3 2 4 5 1 6 Z" fill="currentColor" opacity=".5" />
+      <path d="M38 45 c-3 -1 -4 -4 -1 -6 c3 2 4 5 1 6 Z" fill="currentColor" opacity=".4" />
     </g>
 
     <!-- 默认：远山淡月 -->
