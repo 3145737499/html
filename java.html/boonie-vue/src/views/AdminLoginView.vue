@@ -92,6 +92,8 @@ async function onSubmit() {
         return
       }
       user.setRole(prof.data.role || 'admin')
+      // 角色刚由后端核实过，标记为已校验，避免路由守卫再请求一次 /me
+      user.markProfileVerified()
     } catch {
       user.logout()
       shake()

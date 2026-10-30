@@ -11,7 +11,7 @@
  Target Server Version : 80039 (8.0.39)
  File Encoding         : 65001
 
- Date: 28/10/2026 09:48:20
+ Date: 30/10/2026 16:58:51
 */
 
 SET NAMES utf8mb4;
@@ -30,13 +30,13 @@ CREATE TABLE `admin_user`  (
   `updated_at` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_account`(`account` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '鍚庡彴绠＄悊鍛樿〃' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '鍚庡彴绠＄悊鍛樿〃' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of admin_user
 -- ----------------------------
 INSERT INTO `admin_user` VALUES (1, '314573', '$2a$10$Ufc93A8HLepLWO/fPtrKdut0AVfUPi3MI0umjFA4nK1w/YQp7.aiG', 'admin314573', '2026-10-23 16:50:01', '2026-10-23 16:50:01');
-INSERT INTO `admin_user` VALUES (2, 'admin@boonie.com', '$2a$10$44/5E6LE8QMVfjA5plfxEOP34.sM80Vwga2SMvCYt0ucN2aUZY/Yy', '阁主', '2026-10-28 08:59:05', '2026-10-28 08:59:05');
+INSERT INTO `admin_user` VALUES (2, 'admin@boonie.com', '$2a$10$HyBlTz88k0zk1yrXj/ZR9eAnnV5HxArOEU8JTgZlKRw4wW3iRXmTe', '阁主', '2026-10-28 08:59:05', '2026-10-30 16:29:07');
 
 -- ----------------------------
 -- Table structure for app_category
@@ -141,12 +141,12 @@ CREATE TABLE `app_stat`  (
   `updated_at` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_code`(`code` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '站点统计计数' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 28 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '站点统计计数' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of app_stat
 -- ----------------------------
-INSERT INTO `app_stat` VALUES (1, 'listen_rain', 0, '2026-10-21 00:00:00');
+INSERT INTO `app_stat` VALUES (1, 'listen_rain', 10, '2026-10-21 00:00:00');
 
 -- ----------------------------
 -- Table structure for app_user
@@ -166,7 +166,7 @@ CREATE TABLE `app_user`  (
   UNIQUE INDEX `uk_account`(`account` ASC) USING BTREE,
   INDEX `idx_email`(`email` ASC) USING BTREE,
   INDEX `idx_phone`(`phone` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of app_user
@@ -174,5 +174,6 @@ CREATE TABLE `app_user`  (
 INSERT INTO `app_user` VALUES (1, 'demo@boonie.com', '$2a$10$44/5E6LE8QMVfjA5plfxEOP34.sM80Vwga2SMvCYt0ucN2aUZY/Yy', 'demo@boonie.com', NULL, '烟雨阁少侠', 'user', '2026-10-14 08:34:13', '2026-10-14 08:34:13');
 INSERT INTO `app_user` VALUES (2, '123456789', '$2a$10$4z3PxKW0a3eNIn8zaiXtCechoilkmsLRLU.mFL/NkoIx94SlCB4Ki', NULL, '123456789', '123456789', 'user', '2026-10-14 08:35:03', '2026-10-14 08:35:03');
 INSERT INTO `app_user` VALUES (4, '314573', '$2a$10$7r3qDAQtU.K1CYfpztkAFOPKJDEz3aWkW31nvSaJ.AiS1sthGA4im', NULL, '314573', '314573', 'user', '2026-10-23 16:53:30', '2026-10-23 16:53:30');
+INSERT INTO `app_user` VALUES (5, 'admin@boonie.com', '$2a$10$RQL8jNUJfelk1ZrmvUWYZO8jMtyLIy/RZJ.TPvrrpuFwrnHfz0SRC', 'admin@boonie.com', NULL, 'admin@boonie.com', 'user', '2026-10-30 16:43:27', '2026-10-30 16:43:27');
 
 SET FOREIGN_KEY_CHECKS = 1;

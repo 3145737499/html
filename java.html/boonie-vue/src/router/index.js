@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 
 import LandingView from '@/views/LandingView.vue'
+import { useUserStore } from '@/stores/user'
 
 /**
  * 路由表
@@ -67,27 +68,30 @@ const router = createRouter({
   },
 })
 
-/** 读取本地保存的登录令牌（与 user store 的持久化键保持一致） */
-function localToken() {
-  try {
-    return localStorage.getItem('bb_token') || ''
-  } catch {
-    return ''
-  }
-}
+router.beforeEach(async (to, from, next) => {
+  const user = useUserStore()
 
-router.beforeEach((to, from, next) => {
-  const needAuth = to.meta && to.meta.requiresAuth
-  const hasToken = !!localToken()
+  // 首次进入时 App.vue 的 restore() 可能还没跑，这里兜一次（幂等）
+  if (!user.token) user.restore()
+  // 有令牌就向后端核实账号与真实角色（每会话只请求一次，失败不清会话）
+  if (user.token) await user.ensureProfile()
+
+  const hasToken = !!user.token
 
   // 需登录但无令牌 → 跳到对应登录页（后台去 /admin/login，前台去 /login）
-  if (needAuth && !hasToken) {
-    if (to.name === 'admin') return next({ name: 'admin-login' })
-    return next({ name: 'login' })
+  if (to.meta && to.meta.requiresAuth && !hasToken) {
+    return next(to.name === 'admin' ? { name: 'admin-login' } : { name: 'login' })
+  }
+
+  // 后台管理：必须是「后端已验证的」管理员。
+  // roleVerified 为 false 说明 /me 没拿到结果（后端不可达等），此时放行让 AdminView 的
+  // 401 处理接管，避免网络抖动就把管理员踢出后台。
+  if (to.name === 'admin' && user.roleVerified && !user.isAdmin) {
+    return next({ name: 'admin-login' })
   }
 
   // 已登录又访问登录页 → 直接进入对应主页（避免重复登录）
-  if (hasToken && (to.name === 'admin-login')) {
+  if (hasToken && to.name === 'admin-login' && user.isAdmin) {
     return next({ name: 'admin' })
   }
   if (hasToken && to.name === 'login') {

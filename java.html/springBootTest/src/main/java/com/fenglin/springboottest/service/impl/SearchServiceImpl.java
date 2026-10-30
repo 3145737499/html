@@ -1,6 +1,7 @@
 package com.fenglin.springboottest.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.fenglin.springboottest.common.QueryUtil;
 import com.fenglin.springboottest.common.Result;
 import com.fenglin.springboottest.entity.AppItem;
 import com.fenglin.springboottest.entity.Category;
@@ -41,10 +42,10 @@ public class SearchServiceImpl implements SearchService {
 
 	@Override
 	public Result search(String q, String category, Integer page, Integer pageSize) {
-		String kw = q == null ? "" : q.trim();
+		String kw = QueryUtil.keyword(q);
 		String cat = category == null ? "" : category.trim();
 		int pageNo = page == null || page < 1 ? 1 : page;
-		int size = pageSize == null || pageSize < 1 ? 20 : Math.min(pageSize, 50);
+		int size = QueryUtil.pageSize(pageSize, 20, 50);
 
 		List<Category> allCategories = categoryMapper.selectList(null);
 		Map<Long, String> codeById = new HashMap<>();
@@ -66,13 +67,15 @@ public class SearchServiceImpl implements SearchService {
 			wrapper.in(AppItem::getCategoryId, categoryIds);
 		}
 		if (!kw.isEmpty()) {
-			wrapper.and(w -> w.like(AppItem::getTitle, kw).or().like(AppItem::getSummary, kw));
+			// 转义 % 和 _：否则一串通配符会让索引失效，等同全表扫描
+			String safe = QueryUtil.escapeLike(kw);
+			wrapper.and(w -> w.like(AppItem::getTitle, safe).or().like(AppItem::getSummary, safe));
 		}
 		wrapper.orderByAsc(AppItem::getSortOrder).orderByAsc(AppItem::getId);
 
 		// 手动分页（count + LIMIT）：MP 3.5.9 分页插件已拆到独立依赖，此处不引入
 		Long total = itemMapper.selectCount(wrapper);
-		int offset = (pageNo - 1) * size;
+		int offset = QueryUtil.offset(pageNo, size);
 		wrapper.last("LIMIT " + offset + ", " + size);
 		List<AppItem> records = itemMapper.selectList(wrapper);
 

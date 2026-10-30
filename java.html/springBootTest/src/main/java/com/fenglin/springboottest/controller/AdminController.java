@@ -1,6 +1,7 @@
 package com.fenglin.springboottest.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.fenglin.springboottest.common.QueryUtil;
 import com.fenglin.springboottest.common.Result;
 import com.fenglin.springboottest.entity.AppItem;
 import com.fenglin.springboottest.entity.Category;
@@ -122,17 +123,19 @@ public class AdminController {
 		if (auth == AUTH_FORBIDDEN) return denyForbidden();
 
 		int pageNo = (page == null || page < 1) ? 1 : page;
-		int size = (pageSize == null || pageSize < 1) ? 10 : Math.min(pageSize, 50);
-		String kw = keyword == null ? "" : keyword.trim();
+		int size = QueryUtil.pageSize(pageSize, 10, 50);
+		String kw = QueryUtil.keyword(keyword);
 
 		LambdaQueryWrapper<AppItem> wrapper = new LambdaQueryWrapper<>();
 		if (!kw.isEmpty()) {
-			wrapper.and(w -> w.like(AppItem::getTitle, kw).or().like(AppItem::getSummary, kw));
+			// 转义 % 和 _：否则一串通配符会让索引失效，等同全表扫描
+			String safe = QueryUtil.escapeLike(kw);
+			wrapper.and(w -> w.like(AppItem::getTitle, safe).or().like(AppItem::getSummary, safe));
 		}
 		wrapper.orderByAsc(AppItem::getSortOrder).orderByAsc(AppItem::getId);
 
 		Long total = itemMapper.selectCount(wrapper);
-		int offset = (pageNo - 1) * size;
+		int offset = QueryUtil.offset(pageNo, size);
 		wrapper.last("LIMIT " + offset + ", " + size);
 		List<AppItem> records = itemMapper.selectList(wrapper);
 

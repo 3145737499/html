@@ -270,7 +270,7 @@ watch(
   right: -30px;
   height: 320px;
   z-index: 0;
-  background: url('/ink-hero.png') center 30% / cover no-repeat;
+  background: url('/ink-hero.webp') center 30% / cover no-repeat;
   opacity: 0.3;
   -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 100%);
   mask-image: linear-gradient(180deg, #000 0%, transparent 100%);
@@ -349,7 +349,7 @@ watch(
   right: 16px;
   width: 96px;
   height: 96px;
-  background: url('/umbrella-ink.png') center / 132% no-repeat;
+  background: url('/umbrella-ink.webp') center / 132% no-repeat;
   opacity: 0.13;
   transform: rotate(14deg);
   pointer-events: none;

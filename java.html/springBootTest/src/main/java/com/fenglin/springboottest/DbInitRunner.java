@@ -1,11 +1,18 @@
 package com.fenglin.springboottest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.env.Environment;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
+import java.security.SecureRandom;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
@@ -20,8 +27,21 @@ import java.sql.Statement;
 @Component
 public class DbInitRunner implements CommandLineRunner {
 
+	private static final Logger log = LoggerFactory.getLogger(DbInitRunner.class);
+
+	/** 默认管理员账号 */
+	private static final String ADMIN_ACCOUNT = "admin@boonie.com";
+	/** 旧版本写死在 SQL 与代码里的弱口令哈希（明文 123456），命中则强制轮换 */
+	private static final String KNOWN_WEAK_HASH =
+			"$2a$10$44/5E6LE8QMVfjA5plfxEOP34.sM80Vwga2SMvCYt0ucN2aUZY/Yy";
+
 	@Autowired
 	private DataSource dataSource;
+
+	@Autowired
+	private Environment env;
+
+	private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
 	@Override
 	public void run(String... args) throws Exception {
@@ -56,8 +76,8 @@ public class DbInitRunner implements CommandLineRunner {
 					"PRIMARY KEY (`id`), " +
 					"UNIQUE KEY `uk_admin_account` (`account`)" +
 					") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='后台管理员表'");
-			stmt.execute("INSERT IGNORE INTO admin_user (`account`, `password`, `nickname`) VALUES " +
-					"('admin@boonie.com', '$2a$10$44/5E6LE8QMVfjA5plfxEOP34.sM80Vwga2SMvCYt0ucN2aUZY/Yy', '阁主')");
+			// 管理员账号：口令一律来自配置 boonie.admin.password，不再写死在代码/SQL 里
+			seedAdmin(stmt);
 
 			// 诗笺主题藏品（桥上看景 / 岁晚风暖）：作为真实藏品写入，首页「阁中珍藏」与详情页均可用，幂等
 			stmt.execute("INSERT IGNORE INTO app_category (`id`, `parent_id`, `code`, `name`, `sort_order`, `created_at`, `updated_at`) VALUES " +
@@ -75,6 +95,96 @@ public class DbInitRunner implements CommandLineRunner {
 					"'最是人间留不住。朱颜辞镜，是少年容颜终要从镜中老去；花辞树，是枝头繁花终要离枝零落。王国维以一句道尽无常——人间最留不住的，从来是春光与少年。烟雨阁藏此一笺，愿你惜取眼前人与当下景。', " +
 					"0, 1, 3, NOW(), NOW())");
 		}
+	}
+
+	/**
+	 * 初始化后台管理员账号。
+	 *
+	 * 口令来源优先级：配置项 boonie.admin.password（可用环境变量 BOONIE_ADMIN_PASSWORD 覆盖）
+	 * > 随机生成。旧版本写死在 boonie.sql 与本类里的弱口令（123456）一旦被检测到，
+	 * 一律强制轮换，并把新口令打印到启动日志。
+	 *
+	 * 注意：只在「账号不存在」或「命中已知弱口令」时写入，不会覆盖用户自己改过的密码。
+	 */
+	private void seedAdmin(Statement stmt) throws Exception {
+		String configured = env.getProperty("boonie.admin.password");
+		String current = storedHash(stmt); // null 表示账号还不存在
+
+		// 1) 配置优先：存在则对齐（便于用环境变量改口令），不存在则创建
+		if (StringUtils.hasText(configured)) {
+			String raw = configured.trim();
+			upsertAdmin(stmt, encoder.encode(raw));
+			if (isWeak(raw)) {
+				log.warn("后台管理正在使用弱口令（{}）。部署到任何非本机环境前，"
+						+ "请用环境变量 BOONIE_ADMIN_PASSWORD 设置一个强口令。", raw);
+			}
+			return;
+		}
+
+		// 2) 未配置且账号不存在 → 随机生成，并打印到启动日志
+		if (current == null) {
+			String raw = randomPassword();
+			upsertAdmin(stmt, encoder.encode(raw));
+			printPassword("已生成后台管理员初始口令", raw);
+			return;
+		}
+
+		// 3) 未配置但命中旧版写死的弱口令 → 强制轮换
+		if (KNOWN_WEAK_HASH.equals(current)) {
+			String raw = randomPassword();
+			upsertAdmin(stmt, encoder.encode(raw));
+			printPassword("检测到旧版写死的弱口令，已强制轮换", raw);
+			return;
+		}
+
+		// 4) 已有自定义口令，保持不动
+	}
+
+	/** 简单弱口令识别：过短、纯数字或常见口令 */
+	private boolean isWeak(String raw) {
+		return raw.length() < 8 || raw.matches("\\d+")
+				|| "123456".equals(raw) || "admin".equals(raw) || "password".equals(raw);
+	}
+
+	private void printPassword(String title, String raw) {
+		log.warn("========== {} ==========", title);
+		log.warn("  账号：{}", ADMIN_ACCOUNT);
+		log.warn("  口令：{}", raw);
+		log.warn("  提示：设置环境变量 BOONIE_ADMIN_PASSWORD 可指定固定口令；此口令只打印这一次。");
+		log.warn("============================================================");
+	}
+
+	private void upsertAdmin(Statement stmt, String hash) throws Exception {
+		try (PreparedStatement ps = conn(stmt).prepareStatement(
+				"INSERT INTO admin_user (`account`, `password`, `nickname`) VALUES (?, ?, '阁主') " +
+				"ON DUPLICATE KEY UPDATE `password` = VALUES(`password`)")) {
+			ps.setString(1, ADMIN_ACCOUNT);
+			ps.setString(2, hash);
+			ps.executeUpdate();
+		}
+	}
+
+	private String storedHash(Statement stmt) throws Exception {
+		try (ResultSet rs = stmt.executeQuery(
+				"SELECT `password` FROM admin_user WHERE `account` = '" + ADMIN_ACCOUNT + "' LIMIT 1")) {
+			return rs.next() ? rs.getString(1) : null;
+		}
+	}
+
+	private Connection conn(Statement stmt) throws Exception {
+		return stmt.getConnection();
+	}
+
+	private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+	private static final String PWD_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789@#$%";
+
+	/** 生成 12 位随机口令 */
+	private String randomPassword() {
+		StringBuilder sb = new StringBuilder(12);
+		for (int i = 0; i < 12; i++) {
+			sb.append(PWD_CHARS.charAt(SECURE_RANDOM.nextInt(PWD_CHARS.length())));
+		}
+		return sb.toString();
 	}
 
 	/**

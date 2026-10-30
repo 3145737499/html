@@ -151,7 +151,8 @@ public class AuthServiceImpl implements AuthService {
 				new LambdaQueryWrapper<User>().eq(User::getAccount, account));
 		if (user != null) {
 			if (!encoder.matches(password, user.getPassword())) {
-				return Result.fail("密码错误");
+				// 不区分「密码错误 / 账号不存在」，避免被用来枚举已注册账号
+				return Result.fail("账号或密码错误");
 			}
 			return issueToken(account);
 		}
@@ -160,11 +161,12 @@ public class AuthServiceImpl implements AuthService {
 				new LambdaQueryWrapper<AdminUser>().eq(AdminUser::getAccount, account));
 		if (admin != null) {
 			if (!encoder.matches(password, admin.getPassword())) {
-				return Result.fail("密码错误");
+				// 同上：管理员账号的存在性也不应通过文案泄露
+				return Result.fail("账号或密码错误");
 			}
 			return issueToken(account);
 		}
-		return Result.fail("账号不存在");
+		return Result.fail("账号或密码错误");
 	}
 
 	/** 签发登录 token 并回带账号，供前端持久化登录态 */

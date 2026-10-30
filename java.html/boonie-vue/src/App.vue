@@ -10,8 +10,10 @@ import { useUserStore } from '@/stores/user'
 const route = useRoute()
 const user = useUserStore()
 
-// 应用启动时回填「记住我」的账号
+// 应用启动时回填本地会话（令牌 / 记住的账号 / 角色）
 user.restore()
+// 有令牌时用 /api/auth/me 回补账号与真实角色；令牌已失效则本地自动登出
+user.ensureProfile()
 </script>
 
 <template>

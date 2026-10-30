@@ -6,14 +6,31 @@
 
 const BASE = '/api/auth'
 
+/** 请求超时（毫秒）：后端不可达时不让界面永远卡在等待态 */
+const TIMEOUT_MS = 8000
+
 async function request(path, options = {}) {
   const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) }
-  const res = await fetch(`${BASE}${path}`, { ...options, headers })
-  if (!res.ok) {
-    // 网络层 / 服务端 5xx 等异常
-    return { success: false, message: `服务异常（HTTP ${res.status}），请稍后再试` }
+
+  const ctrl = typeof AbortController === 'function' ? new AbortController() : null
+  const timer = ctrl ? setTimeout(() => ctrl.abort(), TIMEOUT_MS) : null
+
+  try {
+    const res = await fetch(`${BASE}${path}`, {
+      ...options,
+      headers,
+      ...(ctrl ? { signal: ctrl.signal } : {}),
+    })
+    if (!res.ok) {
+      // 网络层 / 服务端 5xx 等异常
+      return { success: false, message: `服务异常（HTTP ${res.status}），请稍后再试` }
+    }
+    return await res.json()
+  } catch {
+    return { success: false, message: '网络异常或请求超时，请稍后再试' }
+  } finally {
+    if (timer) clearTimeout(timer)
   }
-  return res.json()
 }
 
 function post(path, body = {}) {

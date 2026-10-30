@@ -58,9 +58,10 @@ CREATE TABLE `admin_user` (
   UNIQUE KEY `uk_admin_account` (`account`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='后台管理员表';
 
--- 默认管理员：admin@boonie.com / 123456（BCrypt 哈希，与演示账号同款密码）
-INSERT INTO `admin_user` (`account`, `password`, `nickname`) VALUES
-('admin@boonie.com', '$2a$10$44/5E6LE8QMVfjA5plfxEOP34.sM80Vwga2SMvCYt0ucN2aUZY/Yy', '阁主');
+-- 管理员账号不再由本脚本写死口令：
+-- 后端 DbInitRunner 在启动时负责 seeding，口令取自配置项 boonie.admin.password
+-- （等价环境变量 BOONIE_ADMIN_PASSWORD）；未配置则随机生成并打印在启动日志里。
+-- 这样同一份弱口令不会同时散落在 SQL 和 Java 代码两处。
 
 -- ============================================================
 -- 离恨烟·烟雨阁 —— 首页搜索/展示功能建表脚本（2026-10-14）

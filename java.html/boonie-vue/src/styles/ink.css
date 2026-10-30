@@ -18,7 +18,11 @@
 
 body {
   font-family: var(--font-cn);
-  background: linear-gradient(135deg, #cfe3de 0%, #e8f0ec 45%, #d4e6e0 100%);
+  background:
+    radial-gradient(1100px 700px at 16% 10%, rgba(255, 255, 255, 0.6), transparent 62%),
+    radial-gradient(900px 620px at 86% 6%, rgba(240, 231, 205, 0.5), transparent 64%),
+    linear-gradient(158deg, #ecefe7 0%, #f5f2e8 32%, #e3ece5 66%, #d3dfd9 100%);
+  background-attachment: fixed;
   color: var(--ink);
   min-height: 100vh;
   overflow-x: hidden;
@@ -126,6 +130,7 @@ nav.scrolled {
   transition: color 0.25s;
 }
 
+/* 悬停/当前页：墨色渐层细线自中线向两端展开 */
 .nav-links a::after {
   content: '';
   position: absolute;

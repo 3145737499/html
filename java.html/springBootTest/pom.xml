@@ -45,10 +45,7 @@
 			<artifactId>spring-boot-devtools</artifactId>
 			<optional>true</optional>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-thymeleaf</artifactId>
-		</dependency>
+		<!-- thymeleaf 已移除：前后端分离后不再有服务端模板（原 templates/user/login.html 是脚手架残留） -->
 
 		<!-- MyBatis-Plus（Spring Boot 3 适配版） -->
 		<dependency>

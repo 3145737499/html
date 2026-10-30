@@ -27,6 +27,9 @@ body {
 
 a {
   cursor: pointer;
+  /* 导航改用 RouterLink（带真实 href）后，浏览器会给 <a> 加默认下划线，
+     而水墨风只用「金绿细线展开」做悬停指示，此处统一去掉默认下划线 */
+  text-decoration: none;
 }
 
 button {

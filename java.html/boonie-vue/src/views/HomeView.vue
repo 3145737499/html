@@ -5,7 +5,7 @@
  * 风格：沿用登录页水墨设计系统（ink.css 变量与卡片质感）
  *
  * 特效层（2026-10-14 优化）：
- *   - AI 生成水墨横幅（/ink-hero.png）做英雄区背景，随鼠标轻微视差
+ *   - 动漫风水墨横幅（/ink-hero-v2.webp，2026-10-30 换为「烟雨楼阁·芙蓉」图）做英雄区背景，随鼠标轻微视差
  *   - 雨丝层（烟雨阁点题），纯 DOM + CSS 动画，卸载时清理
  *   - 卡片：聚光跟随鼠标 + 水墨印纹水印 + 进场瀑布延迟
  *   - 主标题逐字浮现（毛笔落纸感）
@@ -595,7 +595,7 @@ onBeforeUnmount(() => {
   position: absolute;
   inset: -58px -44px 30px;
   z-index: -1;
-  background: url('/ink-hero.png') center 36% / cover no-repeat;
+  background: url('/ink-hero-v2.webp') center 34% / cover no-repeat;
   opacity: 0.52;
   border-radius: 10px;
   -webkit-mask-image: radial-gradient(115% 95% at 50% 34%, #000 38%, transparent 79%);
@@ -1043,7 +1043,7 @@ onBeforeUnmount(() => {
   position: absolute;
   inset: -10% -6% 0;
   z-index: 0;
-  background: url('/ink-prologue.png') center 30% / cover no-repeat;
+  background: url('/ink-prologue.webp') center 30% / cover no-repeat;
   opacity: 0.26;
   -webkit-mask-image: radial-gradient(125% 120% at 50% 22%, #000 52%, transparent 86%);
   mask-image: radial-gradient(125% 120% at 50% 22%, #000 52%, transparent 86%);
