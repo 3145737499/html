@@ -59,6 +59,22 @@ public class DbInitRunner implements CommandLineRunner {
 					") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='站点统计计数'");
 			stmt.execute("INSERT IGNORE INTO app_stat (`code`, `cnt`) VALUES ('listen_rain', 0)");
 
+			// 众声诗笺：访客留句表（增添诗句接口），兼容「库已存在、未走 SQL 导入」的旧库
+			stmt.execute("CREATE TABLE IF NOT EXISTS app_poem (" +
+					"`id` BIGINT NOT NULL AUTO_INCREMENT, " +
+					"`content` VARCHAR(255) NOT NULL COMMENT '诗句内容', " +
+					"`source` VARCHAR(64) DEFAULT NULL COMMENT '出处 / 署名', " +
+					"`ip` VARCHAR(64) DEFAULT NULL COMMENT '提交者IP', " +
+					"`created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '留句时间', " +
+					"PRIMARY KEY (`id`), " +
+					"KEY `idx_created` (`created_at`)" +
+					") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='众声诗笺·访客留句'");
+			// 首批留句（幂等，避免重复插入）
+			stmt.execute("INSERT IGNORE INTO app_poem (`content`, `source`, `created_at`) VALUES " +
+					"('当时明月在，曾照彩云归', '晏几道《临江仙》', DATE_SUB(NOW(), INTERVAL 2 HOUR)), " +
+					"('山中何事？松花酿酒，春水煎茶', '张可久《人月圆》', DATE_SUB(NOW(), INTERVAL 1 HOUR)), " +
+					"('晚来天欲雪，能饮一杯无', '白居易《问刘十九》', NOW())");
+
 			// 让「伞面丹青」也进入首页精选，阁中珍藏卷轴更丰满（幂等）
 			stmt.execute("UPDATE app_item SET featured = 1 WHERE title = '伞面丹青' AND featured = 0");
 

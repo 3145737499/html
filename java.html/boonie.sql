@@ -11,7 +11,7 @@
  Target Server Version : 80039 (8.0.39)
  File Encoding         : 65001
 
- Date: 30/10/2026 16:58:51
+ Date: 04/11/2026 09:46:26
 */
 
 SET NAMES utf8mb4;
@@ -131,6 +131,36 @@ INSERT INTO `app_item` VALUES (24, 20, '☀️', '岁晚风暖', '风清日暖�
 INSERT INTO `app_item` VALUES (25, 21, '🌸', '镜花辞树', '最是人间留不住，朱颜辞镜花辞树。', '最是人间留不住。朱颜辞镜，是少年容颜终要从镜中老去；花辞树，是枝头繁花终要离枝零落。王国维以一句道尽无常——人间最留不住的，从来是春光与少年。烟雨阁藏此一笺，愿你惜取眼前人与当下景。', 0, 1, 3, '2026-10-28 09:37:24', '2026-10-28 09:37:24');
 
 -- ----------------------------
+-- Table structure for app_poem
+-- ----------------------------
+DROP TABLE IF EXISTS `app_poem`;
+CREATE TABLE `app_poem`  (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `content` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '诗句内容',
+  `source` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '出处 / 署名',
+  `ip` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '提交者IP',
+  `created_at` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '留句时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_created`(`created_at` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '众声诗笺·访客留句' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of app_poem
+-- ----------------------------
+INSERT INTO `app_poem` VALUES (1, '当时明月在，曾照彩云归', '晏几道《临江仙》', NULL, '2026-11-04 07:02:30');
+INSERT INTO `app_poem` VALUES (2, '山中何事？松花酿酒，春水煎茶', '张可久《人月圆》', NULL, '2026-11-04 08:02:30');
+INSERT INTO `app_poem` VALUES (3, '晚来天欲雪，能饮一杯无', '白居易《问刘十九》', NULL, '2026-11-04 09:02:30');
+INSERT INTO `app_poem` VALUES (5, '一笛清影化烟魂，落入江湖伞尤温', '十二楼—离恨烟', '0:0:0:0:0:0:0:1', '2026-11-04 09:24:29');
+INSERT INTO `app_poem` VALUES (6, '落入江湖伞尤温，斜风细雨不须归。', '烟雨阁·集句', '0:0:0:0:0:0:0:1', '2026-11-04 09:24:51');
+INSERT INTO `app_poem` VALUES (7, '倾尽绿蚁花尽开，问潭底剑仙安在哉', '唐—李白', '0:0:0:0:0:0:0:1', '2026-11-04 09:28:25');
+INSERT INTO `app_poem` VALUES (8, '承众愿，祈九天。所念必至，所愿必成！\n佑百代千秋，生生不息。\n佑天地尽知，四时顺遂。\n佑万物有情，众生和乐。\n佑九州辽阔，前途无量。\n佑山河永定，家国长宁。\n佑福禄无忧，财运亨通。', '无名英雄', '0:0:0:0:0:0:0:1', '2026-11-04 09:36:28');
+INSERT INTO `app_poem` VALUES (9, '时雨降世，泽被百川！\n瑞雪兆丰，祁迎百福！\n劲风卷尘，涤荡百秽！\n惊雷撼地，震慑百妖！\n镇收邪祟，荡尽魑魅；百厄除尽，万象更新！', '', '0:0:0:0:0:0:0:1', '2026-11-04 09:39:28');
+INSERT INTO `app_poem` VALUES (10, '衡山如飞，俯临万物！\n恒山如行，御风绝顶！\n华山如立，不可摧折！\n嵩山如卧，万物一府！\n泰山如坐，五岳独尊！\n撼天地，镇乾坤！', '五岳', '0:0:0:0:0:0:0:1', '2026-11-04 09:42:31');
+INSERT INTO `app_poem` VALUES (11, '神虎一跃，威震天地；共此心，共此力！', '神虎', '0:0:0:0:0:0:0:1', '2026-11-04 09:42:53');
+INSERT INTO `app_poem` VALUES (12, '凝瑞气，定山海；山海有灵，天地共生！', '山海', '0:0:0:0:0:0:0:1', '2026-11-04 09:43:11');
+INSERT INTO `app_poem` VALUES (13, '乳虎啸谷，百兽震惶', '寅虎·赤拳', '0:0:0:0:0:0:0:1', '2026-11-04 09:45:31');
+
+-- ----------------------------
 -- Table structure for app_stat
 -- ----------------------------
 DROP TABLE IF EXISTS `app_stat`;
@@ -141,7 +171,7 @@ CREATE TABLE `app_stat`  (
   `updated_at` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_code`(`code` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 28 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '站点统计计数' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 29 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '站点统计计数' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of app_stat

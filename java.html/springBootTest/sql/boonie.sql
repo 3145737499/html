@@ -242,3 +242,27 @@ CREATE TABLE `app_stat` (
   COMMENT='站点统计计数';
 
 INSERT INTO `app_stat` (`code`, `cnt`) VALUES ('listen_rain', 0);
+
+-- ============================================================
+-- 众声诗笺·访客留句表 app_poem（增添诗句接口）
+-- 说明：start-backend.bat 仅在 boonie 库不存在时才导入本文件；
+--       已存在的旧库由后端 DbInitRunner 的 CREATE TABLE IF NOT EXISTS 兜底，
+--       此处一并写入以保证「全新库」与「已有库」最终状态一致。
+-- ============================================================
+DROP TABLE IF EXISTS `app_poem`;
+CREATE TABLE `app_poem` (
+  `id`         BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `content`    VARCHAR(255) NOT NULL                COMMENT '诗句内容',
+  `source`     VARCHAR(64)  DEFAULT NULL            COMMENT '出处 / 署名',
+  `ip`         VARCHAR(64)  DEFAULT NULL            COMMENT '提交者IP（限流与审计，不对外暴露）',
+  `created_at` DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '留句时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_created` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+  COMMENT='众声诗笺·访客留句';
+
+-- 首批留句（让诗笺墙与集句生成开箱即有内容）
+INSERT INTO `app_poem` (`content`, `source`, `created_at`) VALUES
+  ('当时明月在，曾照彩云归', '晏几道《临江仙》', DATE_SUB(NOW(), INTERVAL 2 HOUR)),
+  ('山中何事？松花酿酒，春水煎茶', '张可久《人月圆》', DATE_SUB(NOW(), INTERVAL 1 HOUR)),
+  ('晚来天欲雪，能饮一杯无', '白居易《问刘十九》', NOW());

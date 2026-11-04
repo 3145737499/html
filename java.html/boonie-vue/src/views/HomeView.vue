@@ -15,7 +15,8 @@ import { useRouter } from 'vue-router'
 
 import { useUserStore } from '@/stores/user'
 import { useReveal } from '@/composables/useReveal'
-import { search, fetchHome, fetchStats } from '@/api/search'
+import {search, fetchHome, fetchStats, fetchPoems, submitPoem, fetchPoemCorpus} from '@/api/search'
+import {generatePoemFrom} from '@/utils/poemGen'
 import InkMotif from '@/components/InkMotif.vue'
 
 const router = useRouter()
@@ -211,6 +212,126 @@ function changePoem() {
   poemIndex.value = n
 }
 
+/* 众声诗笺：访客留句 + 集句生成（2026-11-04 新增） */
+const poemDraft = ref('')        // 留句内容
+const poemSource = ref('')       // 出处 / 署名
+const poemMsg = ref('')          // 留句反馈
+const poemErr = ref(false)       // 反馈是否为错误态
+const poemSubmitting = ref(false)
+const poemList = ref([])         // 近期留句
+const poemLoading = ref(false)
+const submittedCorpus = ref([])  // 留句语料（供集句）
+const genText = ref('')          // 集句结果
+const genSrc = ref('采众家诗韵，合成一句江湖')
+const genBusy = ref(false)
+const genLen = ref(0)
+const genCount = ref(0)
+
+/** 集句风格标签：如「七言 · 两句」，把「相似的字数/格式」显式点出 */
+const GEN_LANG = {4: '四言', 5: '五言', 6: '六言', 7: '七言', 8: '八言'}
+const genStyleTag = computed(() => {
+  if (!genLen.value) return ''
+  const lang = GEN_LANG[genLen.value] || genLen.value + '言'
+  const line = genCount.value <= 1 ? '单句' : genCount.value + '句'
+  return lang + ' · ' + line
+})
+
+/* 合并语料：站内固有诗笺 + 每日诗 + 诗笺卡片描述 + 访客留句 */
+function buildCorpusLines() {
+  return [
+    ...verses,
+    ...poemBook.map((p) => p.t),
+    ...extraFeatured.value.map((p) => p.desc),
+    ...submittedCorpus.value,
+  ]
+}
+
+/* 加载近期留句（接口失败保留空列表兜底） */
+async function loadPoems() {
+  poemLoading.value = true
+  try {
+    const res = await fetchPoems(1, 12)
+    if (res.success && res.data) poemList.value = res.data.items || []
+  } catch {
+    /* 静默兜底 */
+  } finally {
+    poemLoading.value = false
+  }
+}
+
+/* 加载留句语料（供集句生成） */
+async function loadCorpus() {
+  try {
+    const res = await fetchPoemCorpus()
+    if (res.success && res.data) {
+      submittedCorpus.value = (res.data.items || []).map((x) => x.content).filter(Boolean)
+    }
+  } catch {
+    /* 静默兜底，集句仍可基于站内固有诗笺工作 */
+  }
+}
+
+/* 通用留句提交：手写留句 与 集句「收入诗笺」共用。
+ * 成功则即时上墙并刷新集句语料（让后续集句吸收新句）。 */
+async function doSubmit(content, source) {
+  poemSubmitting.value = true
+  poemMsg.value = ''
+  try {
+    const res = await submitPoem({content, source})
+    if (res.success && res.data) {
+      poemMsg.value = '已留于烟雨簿，谢君一笺。'
+      poemErr.value = false
+      poemList.value = [res.data, ...poemList.value].slice(0, 12)
+      submittedCorpus.value = [res.data.content, ...submittedCorpus.value].slice(0, 500)
+      if (genText.value) generatePoem() // 若已集过句，顺手刷新
+      return true
+    }
+    poemMsg.value = res.message || '留句未达，请稍后再试'
+    poemErr.value = true
+    return false
+  } catch {
+    poemMsg.value = '网络异常，留雨簿暂不可达'
+    poemErr.value = true
+    return false
+  } finally {
+    poemSubmitting.value = false
+  }
+}
+
+/* 提交手写一句诗 */
+async function submitPoemHandler() {
+  const content = poemDraft.value.trim()
+  if (content.length < 2) {
+    poemMsg.value = '至少写两句字（2 字以上）再留痕～'
+    poemErr.value = true
+    return
+  }
+  const ok = await doSubmit(content, poemSource.value.trim())
+  if (ok) {
+    poemDraft.value = ''
+    poemSource.value = ''
+  }
+}
+
+/* 把当前集句「收入诗笺」：也作为一句留痕入库，丰富后续集句语料 */
+function saveGenerated() {
+  if (!genText.value || genBusy.value) return
+  doSubmit(genText.value, '烟雨阁·集句')
+}
+
+/* 集句生成：基于合并语料合成一首贴近诗笺卡片风格的新诗 */
+function generatePoem() {
+  if (genBusy.value) return
+  genBusy.value = true
+  const lines = buildCorpusLines()
+  const {text, len, count} = generatePoemFrom(lines)
+  genText.value = text || '· · ·'
+  genLen.value = len
+  genCount.value = count
+  genSrc.value = `烟雨阁 · 集句（采 ${lines.length} 句诗韵）`
+  genBusy.value = false
+}
+
 /* 听雨佳绩（读小游戏本地存档，serene=悠然听雨 最贴合慢节奏） */
 const gameBest = ref(0)
 function loadGameBest() {
@@ -298,6 +419,10 @@ onMounted(async () => {
   // 数字速览（藏品数 / 分类数 / 听雨人次），后端失败保留静态兜底
   const statsRes = await fetchStats()
   if (statsRes.success && statsRes.data) stats.value = statsRes.data
+
+  // 众声诗笺：加载近期留句与集句语料（接口失败保留兜底，不影响其他模块）
+  await loadPoems()
+  await loadCorpus()
 
   loadGameBest()
 })
@@ -431,6 +556,82 @@ onBeforeUnmount(() => {
         <p class="poem-text">「{{ poemBook[poemIndex].t }}」</p>
         <p class="poem-src">{{ poemBook[poemIndex].s }}</p>
         <button type="button" class="btn ghost poem-btn" @click="changePoem">换 一 句 ↻</button>
+      </div>
+    </section>
+
+    <!-- ============ 众声诗笺（访客留句 + 集句生成） ============ -->
+    <section class="poem-wall reveal">
+      <div class="pw-head">
+        <h2 class="pw-title">众声诗笺</h2>
+        <span class="pw-sub">往来过客，皆可留一句江湖；集众家诗韵，合一首新笺</span>
+      </div>
+
+      <div class="pw-grid">
+        <!-- 左：留句 + 集句 -->
+        <div class="pw-left">
+          <div class="pw-form">
+            <p class="pw-form-title">留 一 句</p>
+            <textarea
+                v-model="poemDraft"
+                class="pw-input"
+                maxlength="200"
+                placeholder="写下你喜欢的诗，或此刻心头的一句……"
+                rows="3"
+            ></textarea>
+            <input
+                v-model="poemSource"
+                class="pw-src"
+                maxlength="40"
+                placeholder="出处 / 署名（可留空，默认「佚名」）"
+                type="text"
+            />
+            <div class="pw-form-row">
+              <span class="pw-count">{{ poemDraft.length }}/200</span>
+              <button
+                  :disabled="poemSubmitting"
+                  class="btn primary pw-submit"
+                  type="button"
+                  @click="submitPoemHandler"
+              >{{ poemSubmitting ? '留 痕 中…' : '留 句 入 簿' }}
+              </button>
+            </div>
+            <p v-if="poemMsg" :class="{ err: poemErr }" class="pw-msg">{{ poemMsg }}</p>
+          </div>
+
+          <!-- 集句生成卡片（风格同诗笺卡） -->
+          <div class="poem-card pw-gen">
+            <span class="seal seal-mark poem-seal">集</span>
+            <p class="poem-label">烟 雨 集 句</p>
+            <p class="poem-text">「{{ genText || '— 点「拾一句」集句 —' }}」</p>
+            <p class="poem-src">{{ genSrc }}</p>
+            <span v-if="genStyleTag" class="pw-gen-tag">{{ genStyleTag }}</span>
+            <div class="pw-gen-actions">
+              <button :disabled="genBusy" class="btn ghost poem-btn" type="button" @click="generatePoem">
+                拾 一 句 ↻
+              </button>
+              <button
+                  :disabled="poemSubmitting || !genText"
+                  class="btn primary pw-save"
+                  type="button"
+                  @click="saveGenerated"
+              >收 入 诗 笺
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右：近期留句流 -->
+        <div class="pw-stream">
+          <p class="pw-stream-title">近 来 留 痕</p>
+          <div v-if="poemLoading" class="pw-tip">墨迹未干…</div>
+          <ul v-else class="pw-list">
+            <li v-for="p in poemList" :key="p.id" class="pw-item">
+              <p class="pw-item-text">「{{ p.content }}」</p>
+              <p class="pw-item-src">{{ p.source || '佚名' }} · {{ p.createdAt }}</p>
+            </li>
+            <li v-if="!poemList.length" class="pw-item pw-empty">尚无留句，做第一个落笔的人。</li>
+          </ul>
+        </div>
       </div>
     </section>
 
@@ -1310,6 +1511,252 @@ onBeforeUnmount(() => {
   text-indent: 8px;
 }
 
+/* ============ 众声诗笺（访客留句 + 集句生成） ============ */
+.poem-wall {
+  position: relative;
+  z-index: 2;
+  margin: 6px 0 4px;
+}
+
+.pw-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(201, 163, 92, 0.3);
+}
+
+.pw-title {
+  font-size: 24px;
+  font-weight: normal;
+  letter-spacing: 7px;
+  text-indent: 7px;
+}
+
+.pw-sub {
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--ink-soft);
+  opacity: 0.7;
+}
+
+.pw-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 22px;
+  align-items: start;
+}
+
+.pw-left {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.pw-form {
+  position: relative;
+  padding: 26px 26px 22px;
+  background: linear-gradient(160deg, rgba(250, 248, 240, 0.92), rgba(240, 238, 228, 0.85));
+  border: 1px solid rgba(201, 163, 92, 0.45);
+  border-radius: 8px;
+}
+
+.pw-form-title {
+  font-size: 13px;
+  letter-spacing: 8px;
+  text-indent: 8px;
+  color: var(--gold-deep);
+  opacity: 0.8;
+  margin-bottom: 14px;
+}
+
+.pw-input {
+  width: 100%;
+  min-height: 84px;
+  resize: vertical;
+  border: 1px solid rgba(163, 127, 61, 0.45);
+  border-radius: 6px;
+  background: rgba(250, 248, 240, 0.7);
+  padding: 12px 14px;
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1.9;
+  letter-spacing: 2px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+.pw-input:focus {
+  border-color: var(--gold-deep);
+  box-shadow: 0 0 0 3px rgba(201, 163, 92, 0.16);
+}
+
+.pw-src {
+  width: 100%;
+  margin-top: 12px;
+  border: none;
+  border-bottom: 1px solid rgba(163, 127, 61, 0.5);
+  background: transparent;
+  padding: 8px 2px;
+  font-family: inherit;
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--ink-soft);
+  outline: none;
+  transition: border-color 0.25s;
+}
+
+.pw-src:focus {
+  border-color: var(--gold-deep);
+}
+
+.pw-form-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+
+.pw-count {
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: var(--ink-soft);
+  opacity: 0.65;
+}
+
+.pw-submit {
+  padding: 10px 26px;
+  font-size: 14px;
+  letter-spacing: 5px;
+  text-indent: 5px;
+}
+
+.pw-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pw-msg {
+  margin-top: 12px;
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--jade);
+}
+
+.pw-msg.err {
+  color: var(--cinnabar);
+}
+
+/* 集句卡片微调：复用 .poem-card，仅压一下上边距与内距 */
+.pw-gen {
+  margin: 0;
+}
+
+.poem-wall .poem-text {
+  min-height: 38px;
+}
+
+.pw-gen-tag {
+  display: inline-block;
+  margin-bottom: 16px;
+  font-size: 12px;
+  letter-spacing: 3px;
+  color: var(--gold-deep);
+  opacity: 0.78;
+  border: 1px solid rgba(163, 127, 61, 0.4);
+  border-radius: 999px;
+  padding: 3px 14px;
+}
+
+.pw-gen-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.pw-save {
+  padding: 9px 22px;
+  font-size: 14px;
+  letter-spacing: 4px;
+  text-indent: 4px;
+}
+
+.pw-save:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pw-stream {
+  padding: 6px 4px 0;
+}
+
+.pw-stream-title {
+  font-size: 13px;
+  letter-spacing: 6px;
+  text-indent: 6px;
+  color: var(--gold-deep);
+  opacity: 0.8;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed rgba(201, 163, 92, 0.35);
+}
+
+.pw-tip {
+  font-size: 14px;
+  letter-spacing: 4px;
+  color: var(--ink-soft);
+  opacity: 0.7;
+  padding: 24px 0;
+  text-align: center;
+}
+
+.pw-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.pw-item {
+  padding: 14px 16px;
+  background: rgba(250, 248, 240, 0.7);
+  border: 1px solid rgba(201, 163, 92, 0.3);
+  border-left: 3px solid var(--jade);
+  border-radius: 4px;
+  animation: card-pop 0.4s cubic-bezier(0.22, 0.8, 0.3, 1) both;
+}
+
+.pw-item-text {
+  font-size: 15px;
+  line-height: 1.9;
+  letter-spacing: 2px;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.pw-item-src {
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: var(--ink-soft);
+  opacity: 0.7;
+}
+
+.pw-empty {
+  text-align: center;
+  color: var(--ink-soft);
+  opacity: 0.6;
+  border-left-color: rgba(201, 163, 92, 0.4);
+  font-size: 13px;
+  letter-spacing: 2px;
+}
+
 /* ============ 响应式 ============ */
 @media (max-width: 960px) {
   .home-page { padding: 40px 20px 60px; }
@@ -1330,5 +1777,13 @@ onBeforeUnmount(() => {
   .rain-entry-inner { flex-direction: column; text-align: center; }
   .rain-entry-art { display: none; }
   .treasure-strip .hcard { flex-basis: 220px; }
+
+  .pw-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pw-list {
+    max-height: none;
+  }
 }
 </style>

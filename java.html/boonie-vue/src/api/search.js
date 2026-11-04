@@ -72,6 +72,50 @@ export async function recordRain() {
 }
 
 /**
+ * 众声诗笺·近期留句（分页，最新在前）
+ * GET /api/poems?page=&pageSize= -> { success, data: { items:[{id,content,source,createdAt}], total } }
+ */
+export async function fetchPoems(page = 1, pageSize = 12) {
+    try {
+        const query = new URLSearchParams({page: String(page), pageSize: String(pageSize)})
+        const res = await fetch(`/api/poems?${query.toString()}`)
+        return await res.json()
+    } catch (e) {
+        return {success: false, message: '江湖信号不通，稍后再试', data: {items: [], total: 0}}
+    }
+}
+
+/**
+ * 众声诗笺·留句语料（供集句生成，最多 500 条）
+ * GET /api/poems/corpus -> { success, data: { items:[{content,source}] } }
+ */
+export async function fetchPoemCorpus() {
+    try {
+        const res = await fetch('/api/poems/corpus')
+        return await res.json()
+    } catch (e) {
+        return {success: false, message: '江湖信号不通，稍后再试', data: {items: []}}
+    }
+}
+
+/**
+ * 众声诗笺·提交一句诗（匿名）
+ * POST /api/poems { content, source } -> { success, message, data: { id, content, source, createdAt } }
+ */
+export async function submitPoem({content = '', source = ''} = {}) {
+    try {
+        const res = await fetch('/api/poems', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({content, source}),
+        })
+        return await res.json()
+    } catch (e) {
+        return {success: false, message: '网络异常，留句未达烟雨簿'}
+    }
+}
+
+/**
  * 条目详情（详情页）
  * GET /api/item/{id} -> { success, message, data: { id, category, categoryName,
  *   parentCategory, parentCategoryName, ic, title, desc, detail(多段\n分隔), hot, featured, related } }
