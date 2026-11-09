@@ -44,5 +44,5 @@ if %tries% geq 60 (
 ping -n 3 127.0.0.1 >nul
 goto wait_fe
 :fe_ok
-echo [完成] 前端已就绪：http://localhost:5173
+echo [完成] 前端已就绪：http://192.168.68.30:5173
 exit /b 0

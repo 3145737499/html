@@ -1,6 +1,6 @@
 /**
  * 后台管理 API 层
- * 对接 Spring Boot 后端 /api/admin/*（开发环境经 Vite 代理转发到 http://localhost:9090）
+ * 对接 Spring Boot 后端 /api/admin/*（开发环境经 Vite 代理转发到 http://192.168.68.30:9090）
  * 所有接口均需在请求头携带 Authorization: Bearer <token>（token 来自登录后 localStorage 的 bb_token）
  * 统一返回结构：{ success, message, data }；未登录返回 { success:false, code:401, message:"未登录或登录已失效…" }
  */

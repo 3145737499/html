@@ -28,12 +28,12 @@
 ```bash
 # 后端（需 MySQL，账号 root/123456，首次自动执行 sql/boonie.sql）
 cd springBootTest
-mvnw.cmd spring-boot:run        # http://localhost:9090
+mvnw.cmd spring-boot:run        # http://192.168.68.30:9090
 
 # 前端
 cd boonie-vue
 npm install
-npm run dev                     # http://localhost:5173（/api 代理到 9090）
+npm run dev                     # http://192.168.68.30:5173（/api 代理到 9090）
 ```
 
 ## 后端接口

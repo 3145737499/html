@@ -53,7 +53,11 @@ if not %errorlevel%==0 (
 
 REM ---- 4. 后台启动后端（日志写入 start-log.txt）----
 echo [启动] 后端编译并启动中（target 已被重置，需重新编译，请耐心等待）...
-start "烟雨阁后端" /min cmd /c "mvnw.cmd spring-boot:run > start-log.txt 2>&1"
+REM 优先用本机已安装的 Maven，避免 Maven Wrapper 因网络无法下载发行版而启动失败
+set "MVN=mvnw.cmd"
+if not "%MAVEN_HOME%"=="" if exist "%MAVEN_HOME%\bin\mvn.cmd" set "MVN=%MAVEN_HOME%\bin\mvn.cmd"
+if exist "D:\IntelliJ IDEA 2024.3.2.2\plugins\maven\lib\maven3\bin\mvn.cmd" set "MVN=D:\IntelliJ IDEA 2024.3.2.2\plugins\maven\lib\maven3\bin\mvn.cmd"
+start "烟雨阁后端" /min cmd /c ""%MVN%" spring-boot:run > start-log.txt 2>&1"
 
 REM ---- 5. 轮询等待 9090 端口就绪（最多 240 秒）----
 set /a tries=0
@@ -69,5 +73,5 @@ if %tries% geq 120 (
 ping -n 3 127.0.0.1 >nul
 goto wait_backend
 :backend_ok
-echo [完成] 后端已就绪：http://localhost:9090
+echo [完成] 后端已就绪：http://192.168.68.30:9090
 exit /b 0

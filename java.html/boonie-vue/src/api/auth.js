@@ -1,6 +1,6 @@
 /**
  * 认证 API 层
- * 对接 Spring Boot 后端（/api/auth/*，开发环境经 Vite 代理转发到 http://localhost:9090）
+ * 对接 Spring Boot 后端（/api/auth/*，开发环境经 Vite 代理转发到 http://192.168.68.30:9090）
  * 统一返回结构：{ success, message, token, data }
  */
 

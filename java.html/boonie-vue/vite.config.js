@@ -12,11 +12,13 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    // 监听所有网卡(0.0.0.0)：本机 localhost/127.0.0.1 与局域网 192.168.68.30 均可访问
+    host: '0.0.0.0',
     open: true,
-    // 开发环境下把 /api 代理到 Spring Boot 后端（9090）
+    // 开发环境下把 /api 代理到 Spring Boot 后端（9090），改走本机局域网 IP
     proxy: {
       '/api': {
-        target: 'http://localhost:9090',
+        target: 'http://192.168.68.30:9090',
         changeOrigin: true,
       },
     },
