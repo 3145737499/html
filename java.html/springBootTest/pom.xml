@@ -40,6 +40,11 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!--
+		  spring-boot-devtools（开发热重启）。注意：DevTools 会把内嵌 Tomcat 的 server.port 改成随机端口，
+		  覆盖 application-dev.properties 里的 9090；一旦落到随机端口，Vite 代理(127.0.0.1:9090)就再也连不上后端，
+		  注册/登录集体报「服务异常」。已在下方 spring-boot-maven-plugin 用 jvmArguments 锁死 9090，可放心保留热重启。
+		-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
@@ -82,7 +87,14 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-
+				<configuration>
+					<!--
+					  强制内嵌 Tomcat 绑定 9090：DevTools 会把 server.port 改成随机端口，
+					  一旦落到随机端口，Vite 代理(target=127.0.0.1:9090)就再也连不上后端，
+					  注册/登录集体报「服务异常」。这里用 JVM 参数锁死 9090，彻底根治。
+					-->
+					<jvmArguments>-Dserver.port=9090 -Dspring.devtools.add-properties=false</jvmArguments>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

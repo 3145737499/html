@@ -10,6 +10,7 @@ import com.fenglin.springboottest.service.AuthService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -27,12 +28,13 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 /**
  * 认证业务实现
  * - 图形验证码：AWT 绘制水墨风图片（宣纸底 + 噪点 + 干扰弧线 + 旋转字符），
  *   内存缓存（key -> 验证码 + 过期时间），5 分钟有效，一次性使用
- * - 注册：校验图形验证码 + 密码长度(5-15) + 账号唯一，密码使用 BCrypt 加密后入库
+ * - 注册：校验图形验证码 + 密码长度(6-15) + 账号唯一，密码使用 BCrypt 加密后入库
  */
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -58,6 +60,10 @@ public class AuthServiceImpl implements AuthService {
 	/** 验证码字符集：去掉易混淆的 I / O / 0 / 1 / l */
 	private static final String CAPTCHA_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 	private static final int CAPTCHA_LENGTH = 4;
+
+	/** 账号格式：邮箱 / 手机号（仅用于决定写入 email 还是 phone 列，避免越界） */
+	private static final Pattern EMAIL_RE = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+	private static final Pattern PHONE_RE = Pattern.compile("^1[3-9]\\d{9}$");
 
 	/** 水墨配色：墨 / 青绿 / 朱砂 / 鎏金 */
 	private static final Color[] INK_COLORS = {
@@ -112,29 +118,40 @@ public class AuthServiceImpl implements AuthService {
 			return Result.fail("验证码错误或已失效，请刷新后重试");
 		}
 
-		// 2. 账号 / 密码校验
-		if (account == null || account.isBlank()) {
+		// 2. 账号 / 密码校验（统一 trim，避免「注册成功却登录不上」）
+		if (account == null || (account = account.trim()).isEmpty()) {
 			return Result.fail("请输入账号");
 		}
-		if (password == null || password.length() < 5 || password.length() > 15) {
-			return Result.fail("密码长度需为 5-15 位");
+		if (account.length() < 3 || account.length() > 64) {
+			return Result.fail("账号长度需为 3-64 位");
 		}
-		Long count = userMapper.selectCount(new LambdaQueryWrapper<User>().eq(User::getAccount, account));
-		if (count != null && count > 0) {
-			return Result.fail("该账号已注册");
+		if (password == null || password.length() < 6 || password.length() > 15) {
+			return Result.fail("密码长度需为 6-15 位");
 		}
 
-		// 3. 入库
+		// 3. 预查重（快速路径，给出友好提示，避免抛异常）
+		Long count = userMapper.selectCount(new LambdaQueryWrapper<User>().eq(User::getAccount, account));
+		if (count != null && count > 0) {
+			return Result.fail("该账号已注册，请直接登录");
+		}
+
+		// 4. 入库（并发安全：唯一索引兜底，撞键时回退为友好提示，绝不返回 500 崩溃）
 		User user = new User();
 		user.setAccount(account);
 		user.setPassword(encoder.encode(password));
-		if (account.contains("@")) {
+		user.setNickname(account);
+		// 仅当账号本身符合邮箱 / 手机号格式时才写入对应列，否则留空，
+		// 避免超长用户名写入 phone(VARCHAR 20) 触发字段溢出导致注册失败
+		if (EMAIL_RE.matcher(account).matches()) {
 			user.setEmail(account);
-		} else {
+		} else if (PHONE_RE.matcher(account).matches()) {
 			user.setPhone(account);
 		}
-		user.setNickname(account);
-		userMapper.insert(user);
+		try {
+			userMapper.insert(user);
+		} catch (DuplicateKeyException dke) {
+			return Result.fail("该账号已注册，请直接登录");
+		}
 
 		String token = "token-" + UUID.randomUUID();
 		tokenMap.put(token, account);

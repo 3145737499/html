@@ -73,5 +73,5 @@ if %tries% geq 120 (
 ping -n 3 127.0.0.1 >nul
 goto wait_backend
 :backend_ok
-echo [完成] 后端已就绪：http://192.168.68.30:9090
+echo [完成] 后端已就绪：http://localhost:9090（局域网设备经前端 5173 访问）
 exit /b 0

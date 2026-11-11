@@ -21,11 +21,25 @@ async function request(path, options = {}) {
       headers,
       ...(ctrl ? { signal: ctrl.signal } : {}),
     })
-    if (!res.ok) {
-      // 网络层 / 服务端 5xx 等异常
-      return { success: false, message: `服务异常（HTTP ${res.status}），请稍后再试` }
+    // 先读原文再按需解析：后端返回的是约定 JSON，还是代理/路由兜底返回的 HTML 首页
+    const text = await res.text()
+    let body = null
+    try {
+      body = text ? JSON.parse(text) : null
+    } catch {
+      body = null
     }
-    return await res.json()
+
+    if (!res.ok) {
+      // 非 2xx：优先采用后端返回的业务消息（如「该账号已注册」），避免笼统成「服务异常」
+      const msg = body && body.message ? body.message : `服务异常（HTTP ${res.status}），请稍后再试`
+      return { success: false, message: msg }
+    }
+    // 约定结构必须带 success 字段；若拿到的是 HTML（如代理兜底），视为后端未就绪
+    if (!body || typeof body.success === 'undefined') {
+      return { success: false, message: '后端未就绪或网络不通，请确认服务已启动' }
+    }
+    return body
   } catch {
     return { success: false, message: '网络异常或请求超时，请稍后再试' }
   } finally {

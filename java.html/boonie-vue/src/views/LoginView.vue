@@ -14,7 +14,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { useLoginForm } from '@/composables/useLoginForm'
 import { celebrate } from '@/composables/useCelebrate'
-import { getCaptcha, register as apiRegister, login as apiLogin } from '@/api/auth'
+import { getCaptcha, register as apiRegister, login as apiLogin, health } from '@/api/auth'
 
 const router = useRouter()
 const route = useRoute()
@@ -38,6 +38,10 @@ const confirmPassword = ref('')
 const captchaImg = ref('')
 const captchaKey = ref('')
 const captchaLoading = ref(false)
+
+/* ---------------- 后端连通性自检 ---------------- */
+const backendOk = ref(true)
+const backendMsg = ref('')
 
 const { accountState, passwordState } = useLoginForm(account, password)
 
@@ -98,6 +102,8 @@ onMounted(() => {
     setMsg('注册成功，请使用账号登录', 'ok')
     nextTick(() => pwdInput.value?.focus())
   }
+  // 启动即探测后端连通性：别人打不开时能立刻看到原因，而不是笼统的「服务异常」
+  checkBackend()
 })
 
 /* ---------------- 图形验证码交互 ---------------- */
@@ -114,6 +120,20 @@ async function loadCaptcha() {
   captchaKey.value = res.data.key
   code.value = ''
   setMsg('')
+}
+
+/* ---------------- 后端连通性自检（登录页启动时探测，便于快速定位「别人连不上」） ---------------- */
+async function checkBackend() {
+  const res = await health()
+  if (!res.success) {
+    backendOk.value = false
+    backendMsg.value =
+      '⚠ 无法连接后端服务，注册 / 登录将不可用。请确认：①本机后端已启动；' +
+      '②对方与你在同一局域网（或改用内网穿透 / 公网部署）；③防火墙放行 5173 端口。'
+  } else {
+    backendOk.value = true
+    backendMsg.value = ''
+  }
 }
 
 /* ---------------- 交互 ---------------- */
@@ -270,6 +290,8 @@ async function guestLogin() {
         <div class="card" :class="{ shake: shaking }">
           <span class="corner tl"></span><span class="corner tr"></span>
           <span class="corner bl"></span><span class="corner br"></span>
+
+          <div v-if="!backendOk" class="backend-warn">{{ backendMsg }}</div>
 
           <div class="seal seal-mark">离恨烟</div>
 
@@ -655,6 +677,19 @@ async function guestLogin() {
 /* 卡片进场动画（全局 .card 样式之外的补充） */
 .card {
   animation: card-in 1.2s 0.3s cubic-bezier(0.22, 0.8, 0.3, 1) both;
+}
+
+/* 后端连通性告警横幅（别人连不上时给出明确指引，而不是笼统「服务异常」） */
+.backend-warn {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border: 1px solid #b3362b;
+  border-radius: 8px;
+  background: rgba(179, 54, 43, 0.08);
+  color: #b3362b;
+  font-size: 13px;
+  line-height: 1.7;
+  text-align: left;
 }
 
 @keyframes card-in {
